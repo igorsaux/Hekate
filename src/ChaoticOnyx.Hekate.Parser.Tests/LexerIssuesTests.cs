@@ -22,7 +22,7 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
             Assert.True(errors.Count == 1);
 
             Assert.True(errors[0]
-                            .Id == IssueId.Dm0001);
+                            .Id == "DM0001");
         }
 
         [Fact]
@@ -39,7 +39,7 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
             Assert.True(errors.Count == 1);
 
             Assert.True(errors[0]
-                            .Id == IssueId.Dm0001);
+                            .Id == "DM0001");
         }
 
         [Fact]
@@ -56,7 +56,7 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
             Assert.True(errors.Count == 1);
 
             Assert.True(errors[0]
-                            .Id == IssueId.Dm0001);
+                            .Id == "DM0001");
         }
 
         [Fact]
@@ -73,7 +73,7 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
             Assert.True(errors.Count == 1);
 
             Assert.True(errors[0]
-                            .Id == IssueId.Dm0002);
+                            .Id == "DM0002");
         }
 
         [Fact]
@@ -90,7 +90,7 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
             Assert.True(errors.Count == 1);
 
             Assert.True(errors[0]
-                            .Id == IssueId.Dm0003);
+                            .Id == "DM0003");
         }
     }
 }
