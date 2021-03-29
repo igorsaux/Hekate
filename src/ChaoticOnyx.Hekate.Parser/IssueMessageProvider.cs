@@ -1,6 +1,7 @@
 ﻿#region
 
 using System.Diagnostics;
+using System.Resources;
 using System.Text;
 using ChaoticOnyx.Hekate.Parser.resources;
 
@@ -15,14 +16,13 @@ namespace ChaoticOnyx.Hekate.Parser
         /// </summary>
         /// <param name="issue">Проблема.</param>
         /// <returns>Отформатированное сообщение об проблеме.</returns>
-        public static string GetDescription(this CodeIssue issue)
+        public static string GetDescription(this CodeIssue issue, ResourceManager resources)
         {
             var result = new StringBuilder();
 
-            var issueId = issue.Id.ToString()
-                               .ToUpper();
+            var issueId = issue.Id.ToUpper();
 
-            var format = ParserResources.ResourceManager.GetString(issueId);
+            var format = resources.GetString(issueId);
             Debug.Assert(format != null, $"Key {issueId} not localized.");
             result.AppendFormat(format, issue.Arguments);
 

@@ -80,14 +80,14 @@ namespace ChaoticOnyx.Hekate.Parser
         /// </summary>
         /// <param name="id">Идентификатор проблемы.</param>
         /// <param name="token">Токен, с которым связана проблема.</param>
-        private void MakeIssue(IssueId id, SyntaxToken token)
+        private void MakeIssue(string id, SyntaxToken token)
         {
             MakeIssue(id, token, Array.Empty<object>());
         }
 
         /// <inheritdoc cref="MakeIssue(ChaoticOnyx.Hekate.Parser.IssueId,ChaoticOnyx.Hekate.Parser.SyntaxToken)" />
         /// <param name="args">Дополнительные аргументы, используются для форматирования сообщения об проблеме.</param>
-        private void MakeIssue(IssueId id, SyntaxToken token, params object[] args)
+        private void MakeIssue(string id, SyntaxToken token, params object[] args)
         {
             _issues.Add(new(id, token, args));
         }
@@ -214,7 +214,7 @@ namespace ChaoticOnyx.Hekate.Parser
 
                     if (!parsingResult)
                     {
-                        MakeIssue(IssueId.Dm0001, token, token.Text);
+                        MakeIssue("DM0001", token, token.Text);
                     }
 
                     return token;
@@ -225,7 +225,7 @@ namespace ChaoticOnyx.Hekate.Parser
 
                     if (!parsingResult)
                     {
-                        MakeIssue(IssueId.Dm0001, token, token.Text);
+                        MakeIssue("DM0001", token, token.Text);
                     }
 
                     return token;
@@ -269,7 +269,7 @@ namespace ChaoticOnyx.Hekate.Parser
 
                     if (token.Kind == SyntaxKind.Directive)
                     {
-                        MakeIssue(IssueId.Dm0003, token, token.Text);
+                        MakeIssue("DM0003", token, token.Text);
                     }
 
                     return token;
@@ -294,7 +294,7 @@ namespace ChaoticOnyx.Hekate.Parser
             }
 
             token = CreateToken(SyntaxKind.Unknown);
-            MakeIssue(IssueId.Dm0002, token, token.Text);
+            MakeIssue("DM0002", token, token.Text);
 
             return token;
         }
@@ -483,7 +483,7 @@ namespace ChaoticOnyx.Hekate.Parser
 
                                 if (!endFounded)
                                 {
-                                    MakeIssue(IssueId.Dm0001, comment, "/*");
+                                    MakeIssue("DM0001", comment, "/*");
                                 }
 
                                 trivia.Add(comment);
