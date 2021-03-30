@@ -55,6 +55,14 @@ namespace ChaoticOnyx.Hekate.Parser
         }
 
         /// <summary>
+        ///     Возвращает относительное расположение токена в тексте.
+        /// </summary>
+        public FileLine FilePosition
+        {
+            get;
+        } = new(1, 1);
+
+        /// <summary>
         ///     Возвращает true если имеет в хвостовых токенах конец линии.
         /// </summary>
         public bool HasEndOfLine => _trailTokens.Count(t => t.Kind == SyntaxKind.EndOfLine) > 0;
@@ -78,6 +86,11 @@ namespace ChaoticOnyx.Hekate.Parser
         public SyntaxToken(SyntaxKind kind, string text, int position) : this(kind, text)
         {
             Position = position;
+        }
+
+        public SyntaxToken(SyntaxKind kind, string text, int position, FileLine filePosition) : this(kind, text, position)
+        {
+            FilePosition = filePosition;
         }
 
         /// <summary>

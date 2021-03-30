@@ -117,7 +117,7 @@ namespace ChaoticOnyx.Hekate.Parser
         /// <param name="args">Дополнительные аргументы, используются для форматирования сообщения об проблеме.</param>
         private void MakeIssue(string id, SyntaxToken token, params object[] args)
         {
-            _issues.Add(new(id, token, _source.FilePosition, args));
+            _issues.Add(new(id, token, _source.OffsetFilePosition, args));
         }
 
         /// <summary>
@@ -242,7 +242,7 @@ namespace ChaoticOnyx.Hekate.Parser
 
                     if (!parsingResult)
                     {
-                        MakeIssue("DM0001", token, token.Text);
+                        MakeIssue(IssuesId.MissingClosingSign, token, token.Text);
                     }
 
                     return token;
@@ -253,7 +253,7 @@ namespace ChaoticOnyx.Hekate.Parser
 
                     if (!parsingResult)
                     {
-                        MakeIssue("DM0001", token, token.Text);
+                        MakeIssue(IssuesId.MissingClosingSign, token, token.Text);
                     }
 
                     return token;
@@ -297,7 +297,7 @@ namespace ChaoticOnyx.Hekate.Parser
 
                     if (token.Kind == SyntaxKind.Directive)
                     {
-                        MakeIssue("DM0003", token, token.Text);
+                        MakeIssue(IssuesId.UnknownDirective, token, token.Text);
                     }
 
                     return token;
@@ -322,7 +322,7 @@ namespace ChaoticOnyx.Hekate.Parser
             }
 
             token = CreateToken(SyntaxKind.Unknown);
-            MakeIssue("DM0002", token, token.Text);
+            MakeIssue(IssuesId.UnexpectedToken, token, token.Text);
 
             return token;
         }
@@ -461,12 +461,12 @@ namespace ChaoticOnyx.Hekate.Parser
         {
             _source.Advance(length);
 
-            return new(kind, _source.LexemeText, _source.Position);
+            return new(kind, _source.LexemeText, _source.Position, _source.LexemeFilePosition);
         }
 
         private SyntaxToken CreateToken(SyntaxKind kind)
         {
-            return new(kind, _source.LexemeText, _source.Position);
+            return new(kind, _source.LexemeText, _source.Position, _source.LexemeFilePosition);
         }
 
         /// <summary>
@@ -511,7 +511,7 @@ namespace ChaoticOnyx.Hekate.Parser
 
                                 if (!endFounded)
                                 {
-                                    MakeIssue("DM0001", comment, "/*");
+                                    MakeIssue(IssuesId.MissingClosingSign, comment, "/*");
                                 }
 
                                 trivia.Add(comment);
