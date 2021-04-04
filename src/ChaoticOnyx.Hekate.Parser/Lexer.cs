@@ -10,631 +10,640 @@ using System.Text;
 
 namespace ChaoticOnyx.Hekate.Parser
 {
-    /// <summary>
-    ///     Лексический анализатор.
-    /// </summary>
-    public class Lexer
-    {
-        private readonly List<CodeIssue>   _issues          = new();
-        private readonly List<SyntaxToken> _leadTokensCache = new();
-        private readonly TextContainer     _source;
-        private readonly List<SyntaxToken> _tokens           = new();
-        private readonly List<SyntaxToken> _trailTokensCache = new();
+	/// <summary>
+	///     Лексический анализатор.
+	/// </summary>
+	public class Lexer
+	{
+		private readonly List<CodeIssue>   _issues          = new();
+		private readonly List<SyntaxToken> _leadTokensCache = new();
+		private readonly TextContainer     _source;
+		private readonly List<SyntaxToken> _tokens           = new();
+		private readonly List<SyntaxToken> _trailTokensCache = new();
 
-        /// <summary>
-        ///     Токены в единице компиляции.
-        /// </summary>
-        public ReadOnlyCollection<SyntaxToken> Tokens => _tokens.AsReadOnly();
+		/// <summary>
+		///     Токены в единице компиляции.
+		/// </summary>
+		public ReadOnlyCollection<SyntaxToken> Tokens => _tokens.AsReadOnly();
 
-        /// <summary>
-        ///     Проблемы обнаруженные в единице компиляции.
-        /// </summary>
-        public ReadOnlyCollection<CodeIssue> Issues => _issues.AsReadOnly();
+		/// <summary>
+		///     Проблемы обнаруженные в единице компиляции.
+		/// </summary>
+		public ReadOnlyCollection<CodeIssue> Issues => _issues.AsReadOnly();
 
-        /// <summary>
-        ///     Создание нового лексера из текста.
-        /// </summary>
-        /// <param name="source">Исходный код единицы компиляции.</param>
-        public Lexer(string source, int tabWidth = 4)
-        {
-            _source = new(source, tabWidth);
-        }
+		/// <summary>
+		///     Создание нового лексера из текста.
+		/// </summary>
+		/// <param name="source">Исходный код единицы компиляции.</param>
+		/// <param name="tabWidth">Ширина таба в файле.</param>
+		public Lexer(string source, int tabWidth = 4) { _source = new TextContainer(source, tabWidth); }
 
-        /// <summary>
-        ///     Создание нового лексера из набора токенов.
-        /// </summary>
-        /// <param name="tokens">Набор токенов.</param>
-        public Lexer(params SyntaxToken[] tokens) : this(4, tokens) { }
+		/// <summary>
+		///     Создание нового лексера из набора токенов.
+		/// </summary>
+		/// <param name="tokens">Набор токенов.</param>
+		public Lexer(params SyntaxToken[] tokens) : this(4, tokens) { }
 
-        public Lexer(int tabWidth, params SyntaxToken[] tokens)
-        {
-            _tokens = tokens.ToList();
-            _source = new(Emit(), tabWidth);
-            Parse();
-        }
+		public Lexer(int tabWidth, params SyntaxToken[] tokens)
+		{
+			_tokens = tokens.ToList();
+			_source = new TextContainer(Emit(), tabWidth);
+			Parse();
+		}
 
-        /// <summary>
-        ///     Выполнение лексического парсинга исходного кода. При вызове функции все данные с предыдущего парсинга обнуляются.
-        /// </summary>
-        public void Parse()
-        {
-            _tokens.Clear();
+		/// <summary>
+		///     Выполнение лексического парсинга исходного кода. При вызове функции все данные с предыдущего парсинга обнуляются.
+		/// </summary>
+		public void Parse()
+		{
+			_tokens.Clear();
 
-            while (true)
-            {
-                var token = Lex();
-                _tokens.Add(token);
+			while (true)
+			{
+				SyntaxToken token = Lex();
+				_tokens.Add(token);
 
-                if (token.Kind == SyntaxKind.EndOfFile)
-                {
-                    return;
-                }
-            }
-        }
+				if (token.Kind == SyntaxKind.EndOfFile)
+				{
+					return;
+				}
+			}
+		}
 
-        /// <summary>
-        ///     Превращение последовательности токенов в текст.
-        /// </summary>
-        /// <returns></returns>
-        public string Emit()
-        {
-            StringBuilder builder = new();
+		/// <summary>
+		///     Превращение последовательности токенов в текст.
+		/// </summary>
+		/// <returns></returns>
+		public string Emit()
+		{
+			StringBuilder builder = new();
 
-            foreach (var token in _tokens)
-            {
-                builder.Append(token.FullText);
-            }
+			foreach (var token in _tokens)
+			{
+				builder.Append(token.FullText);
+			}
 
-            return builder.ToString();
-        }
+			return builder.ToString();
+		}
 
-        /// <summary>
-        ///     Парсинг одного токена с хвостами и ведущими.
-        /// </summary>
-        /// <returns></returns>
-        private SyntaxToken Lex()
-        {
-            _leadTokensCache.Clear();
-            ParseTokenTrivia(false, _leadTokensCache);
-            var token = ScanToken();
-            _trailTokensCache.Clear();
-            ParseTokenTrivia(true, _trailTokensCache);
-            token.AddLeadTokens(_leadTokensCache.ToArray());
-            token.AddTrailTokens(_trailTokensCache.ToArray());
+		/// <summary>
+		///     Парсинг одного токена с хвостами и ведущими.
+		/// </summary>
+		/// <returns></returns>
+		private SyntaxToken Lex()
+		{
+			_leadTokensCache.Clear();
+			ParseTokenTrivia(false, _leadTokensCache);
+			SyntaxToken token = ScanToken();
+			_trailTokensCache.Clear();
+			ParseTokenTrivia(true, _trailTokensCache);
+			token.AddLeadTokens(_leadTokensCache.ToArray());
+			token.AddTrailTokens(_trailTokensCache.ToArray());
 
-            return token;
-        }
+			return token;
+		}
 
-        /// <summary>
-        ///     Создание проблемы в коде.
-        /// </summary>
-        /// <param name="id">Идентификатор проблемы.</param>
-        /// <param name="token">Токен, с которым связана проблема.</param>
-        private void MakeIssue(string id, SyntaxToken token)
-        {
-            MakeIssue(id, token, Array.Empty<object>());
-        }
+		/// <summary>
+		///     Создание проблемы в коде.
+		/// </summary>
+		/// <param name="id">Идентификатор проблемы.</param>
+		/// <param name="token">Токен, с которым связана проблема.</param>
+		private void MakeIssue(string id, SyntaxToken token) { MakeIssue(id, token, Array.Empty<object>()); }
 
-        /// <inheritdoc cref="MakeIssue(ChaoticOnyx.Hekate.Parser.IssueId,ChaoticOnyx.Hekate.Parser.SyntaxToken)" />
-        /// <param name="args">Дополнительные аргументы, используются для форматирования сообщения об проблеме.</param>
-        private void MakeIssue(string id, SyntaxToken token, params object[] args)
-        {
-            _issues.Add(new(id, token, _source.OffsetFilePosition, args));
-        }
+		/// <summary>
+		///     Создание проблемы в коде.
+		/// </summary>
+		/// <param name="id">Идентификатор проблемы.</param>
+		/// <param name="token">Токен, с которым связана проблема.</param>
+		/// <param name="args">Дополнительные аргументы, используются для форматирования сообщения об проблеме.</param>
+		private void MakeIssue(string id, SyntaxToken token, params object[] args)
+		{
+			_issues.Add(new CodeIssue(id, token, _source.OffsetFilePosition, args));
+		}
 
-        /// <summary>
-        ///     Парсинг одного токена.
-        /// </summary>
-        /// <returns></returns>
-        private SyntaxToken ScanToken()
-        {
-            _source.Start();
+		/// <summary>
+		///     Парсинг одного токена.
+		/// </summary>
+		/// <returns></returns>
+		private SyntaxToken ScanToken()
+		{
+			_source.Start();
 
-            if (_source.IsEnd)
-            {
-                return CreateTokenAndAdvance(SyntaxKind.EndOfFile, 0);
-            }
+			if (_source.IsEnd)
+			{
+				return CreateTokenAndAdvance(SyntaxKind.EndOfFile, 0);
+			}
 
-            var         ch            = _source.Peek();
-            var         parsingResult = false;
-            SyntaxToken token;
-            var         next = _source.Peek(2);
+			char        ch            = _source.Peek();
+			var         parsingResult = false;
+			SyntaxToken token;
+			char        next = _source.Peek(2);
 
-            switch (ch)
-            {
-                case '/':
-                    switch (next)
-                    {
-                        case '=':
-                            return CreateTokenAndAdvance(SyntaxKind.SlashEqual, 2);
-                    }
+			switch (ch)
+			{
+				case '/':
+					switch (next)
+					{
+						case '=':
+							return CreateTokenAndAdvance(SyntaxKind.SlashEqual, 2);
+					}
 
-                    return CreateTokenAndAdvance(SyntaxKind.Slash, 1);
+					return CreateTokenAndAdvance(SyntaxKind.Slash, 1);
 
-                    ;
-                case '\\':
-                    switch (next)
-                    {
-                        case '=':
-                            return CreateTokenAndAdvance(SyntaxKind.BackwardSlashEqual, 2);
-                    }
+					;
+				case '\\':
+					switch (next)
+					{
+						case '=':
+							return CreateTokenAndAdvance(SyntaxKind.BackwardSlashEqual, 2);
+					}
 
-                    break;
-                case '*':
-                    return next switch
-                    {
-                        '=' => CreateTokenAndAdvance(SyntaxKind.AsteriskEqual, 2),
-                        '*' => CreateTokenAndAdvance(SyntaxKind.DoubleAsterisk, 2),
-                        _   => CreateTokenAndAdvance(SyntaxKind.Asterisk, 1)
-                    };
-                case '=':
-                    return next switch
-                    {
-                        '=' => CreateTokenAndAdvance(SyntaxKind.DoubleEqual, 2),
-                        _   => CreateTokenAndAdvance(SyntaxKind.Equal, 1)
-                    };
-                case '!':
-                    return next switch
-                    {
-                        '=' => CreateTokenAndAdvance(SyntaxKind.ExclamationEqual, 2),
-                        _   => CreateTokenAndAdvance(SyntaxKind.Exclamation, 1)
-                    };
-                case '>':
-                    switch (next)
-                    {
-                        case '=':
-                            return CreateTokenAndAdvance(SyntaxKind.GreaterEqual, 2);
-                        case '>':
-                            var next2 = _source.Peek(3);
+					break;
+				case '*':
+					return next switch
+					{
+						'=' => CreateTokenAndAdvance(SyntaxKind.AsteriskEqual, 2),
+						'*' => CreateTokenAndAdvance(SyntaxKind.DoubleAsterisk, 2),
+						_   => CreateTokenAndAdvance(SyntaxKind.Asterisk, 1)
+					};
+				case '=':
+					return next switch
+					{
+						'=' => CreateTokenAndAdvance(SyntaxKind.DoubleEqual, 2),
+						_   => CreateTokenAndAdvance(SyntaxKind.Equal, 1)
+					};
+				case '!':
+					return next switch
+					{
+						'=' => CreateTokenAndAdvance(SyntaxKind.ExclamationEqual, 2),
+						_   => CreateTokenAndAdvance(SyntaxKind.Exclamation, 1)
+					};
+				case '>':
+					switch (next)
+					{
+						case '=':
+							return CreateTokenAndAdvance(SyntaxKind.GreaterEqual, 2);
+						case '>':
+							char next2 = _source.Peek(3);
 
-                            return next2 switch
-                            {
-                                '=' => CreateTokenAndAdvance(SyntaxKind.DoubleGreaterEqual, 3),
-                                _   => CreateTokenAndAdvance(SyntaxKind.DoubleGreater, 2)
-                            };
-                    }
+							return next2 switch
+							{
+								'=' => CreateTokenAndAdvance(SyntaxKind.DoubleGreaterEqual, 3),
+								_   => CreateTokenAndAdvance(SyntaxKind.DoubleGreater, 2)
+							};
+					}
 
-                    return CreateTokenAndAdvance(SyntaxKind.Greater, 1);
-                case '<':
-                    switch (next)
-                    {
-                        case '=':
-                            return CreateTokenAndAdvance(SyntaxKind.LesserEqual, 2);
-                        case '<':
-                            var next2 = _source.Peek(3);
+					return CreateTokenAndAdvance(SyntaxKind.Greater, 1);
+				case '<':
+					switch (next)
+					{
+						case '=':
+							return CreateTokenAndAdvance(SyntaxKind.LesserEqual, 2);
+						case '<':
+							char next2 = _source.Peek(3);
 
-                            return next2 switch
-                            {
-                                '=' => CreateTokenAndAdvance(SyntaxKind.DoubleLesserEqual, 3),
-                                _   => CreateTokenAndAdvance(SyntaxKind.DoubleLesser, 2)
-                            };
-                    }
+							return next2 switch
+							{
+								'=' => CreateTokenAndAdvance(SyntaxKind.DoubleLesserEqual, 3),
+								_   => CreateTokenAndAdvance(SyntaxKind.DoubleLesser, 2)
+							};
+					}
 
-                    return CreateTokenAndAdvance(SyntaxKind.Lesser, 1);
-                case '(':
-                    return CreateTokenAndAdvance(SyntaxKind.OpenParenthesis, 1);
-                case ')':
-                    return CreateTokenAndAdvance(SyntaxKind.CloseParenthesis, 1);
-                case '{':
-                    return CreateTokenAndAdvance(SyntaxKind.OpenBrace, 1);
-                case '}':
-                    return CreateTokenAndAdvance(SyntaxKind.CloseBrace, 1);
-                case '[':
-                    return CreateTokenAndAdvance(SyntaxKind.OpenBracket, 1);
-                case ']':
-                    return CreateTokenAndAdvance(SyntaxKind.CloseBracket, 1);
-                case '+':
-                    return next switch
-                    {
-                        '=' => CreateTokenAndAdvance(SyntaxKind.PlusEqual, 2),
-                        '+' => CreateTokenAndAdvance(SyntaxKind.DoublePlus, 2),
-                        _   => CreateTokenAndAdvance(SyntaxKind.Plus, 1)
-                    };
-                case '-':
-                    return next switch
-                    {
-                        '=' => CreateTokenAndAdvance(SyntaxKind.MinusEqual, 2),
-                        '-' => CreateTokenAndAdvance(SyntaxKind.DoubleMinus, 2),
-                        _   => CreateTokenAndAdvance(SyntaxKind.Minus, 1)
-                    };
-                case '\'':
-                    _source.Advance();
-                    parsingResult = ParsePathLiteral();
-                    token         = CreateToken(SyntaxKind.PathLiteral);
+					return CreateTokenAndAdvance(SyntaxKind.Lesser, 1);
+				case '(':
+					return CreateTokenAndAdvance(SyntaxKind.OpenParenthesis, 1);
+				case ')':
+					return CreateTokenAndAdvance(SyntaxKind.CloseParenthesis, 1);
+				case '{':
+					return CreateTokenAndAdvance(SyntaxKind.OpenBrace, 1);
+				case '}':
+					return CreateTokenAndAdvance(SyntaxKind.CloseBrace, 1);
+				case '[':
+					return CreateTokenAndAdvance(SyntaxKind.OpenBracket, 1);
+				case ']':
+					return CreateTokenAndAdvance(SyntaxKind.CloseBracket, 1);
+				case '+':
+					return next switch
+					{
+						'=' => CreateTokenAndAdvance(SyntaxKind.PlusEqual, 2),
+						'+' => CreateTokenAndAdvance(SyntaxKind.DoublePlus, 2),
+						_   => CreateTokenAndAdvance(SyntaxKind.Plus, 1)
+					};
+				case '-':
+					return next switch
+					{
+						'=' => CreateTokenAndAdvance(SyntaxKind.MinusEqual, 2),
+						'-' => CreateTokenAndAdvance(SyntaxKind.DoubleMinus, 2),
+						_   => CreateTokenAndAdvance(SyntaxKind.Minus, 1)
+					};
+				case '\'':
+					_source.Advance();
+					parsingResult = ParsePathLiteral();
+					token         = CreateToken(SyntaxKind.PathLiteral);
 
-                    if (!parsingResult)
-                    {
-                        MakeIssue(IssuesId.MissingClosingSign, token, token.Text);
-                    }
+					if (!parsingResult)
+					{
+						MakeIssue(IssuesId.MissingClosingSign, token, token.Text);
+					}
 
-                    return token;
-                case '\"':
-                    _source.Advance();
-                    parsingResult = ParseTextLiteral();
-                    token         = CreateToken(SyntaxKind.TextLiteral);
+					return token;
+				case '\"':
+					_source.Advance();
+					parsingResult = ParseTextLiteral();
+					token         = CreateToken(SyntaxKind.TextLiteral);
 
-                    if (!parsingResult)
-                    {
-                        MakeIssue(IssuesId.MissingClosingSign, token, token.Text);
-                    }
+					if (!parsingResult)
+					{
+						MakeIssue(IssuesId.MissingClosingSign, token, token.Text);
+					}
 
-                    return token;
-                case '%':
-                    return next switch
-                    {
-                        '=' => CreateTokenAndAdvance(SyntaxKind.PercentEqual, 2),
-                        _   => CreateTokenAndAdvance(SyntaxKind.Percent, 1)
-                    };
-                case '&':
-                    return next switch
-                    {
-                        '=' => CreateTokenAndAdvance(SyntaxKind.AmpersandEqual, 2),
-                        '&' => CreateTokenAndAdvance(SyntaxKind.DoubleAmpersand, 2),
-                        _   => CreateTokenAndAdvance(SyntaxKind.Ampersand, 1)
-                    };
-                case '?':
-                    return CreateTokenAndAdvance(SyntaxKind.Question, 1);
-                case ':':
-                    return CreateTokenAndAdvance(SyntaxKind.Colon, 1);
-                case '^':
-                    return next switch
-                    {
-                        '=' => CreateTokenAndAdvance(SyntaxKind.CaretEqual, 2),
-                        _   => CreateTokenAndAdvance(SyntaxKind.Caret, 1)
-                    };
-                case '|':
-                    return next switch
-                    {
-                        '=' => CreateTokenAndAdvance(SyntaxKind.BarEqual, 2),
-                        '|' => CreateTokenAndAdvance(SyntaxKind.DoubleBar, 2),
-                        _   => CreateTokenAndAdvance(SyntaxKind.Bar, 1)
-                    };
-                case ',':
-                    return CreateTokenAndAdvance(SyntaxKind.Comma, 1);
-                case '#':
-                    _source.Advance();
-                    ParseIdentifier();
-                    token = CreateToken(SyntaxKind.Directive);
+					return token;
+				case '%':
+					return next switch
+					{
+						'=' => CreateTokenAndAdvance(SyntaxKind.PercentEqual, 2),
+						_   => CreateTokenAndAdvance(SyntaxKind.Percent, 1)
+					};
+				case '&':
+					return next switch
+					{
+						'=' => CreateTokenAndAdvance(SyntaxKind.AmpersandEqual, 2),
+						'&' => CreateTokenAndAdvance(SyntaxKind.DoubleAmpersand, 2),
+						_   => CreateTokenAndAdvance(SyntaxKind.Ampersand, 1)
+					};
+				case '?':
+					return CreateTokenAndAdvance(SyntaxKind.Question, 1);
+				case ':':
+					return CreateTokenAndAdvance(SyntaxKind.Colon, 1);
+				case '^':
+					return next switch
+					{
+						'=' => CreateTokenAndAdvance(SyntaxKind.CaretEqual, 2),
+						_   => CreateTokenAndAdvance(SyntaxKind.Caret, 1)
+					};
+				case '|':
+					return next switch
+					{
+						'=' => CreateTokenAndAdvance(SyntaxKind.BarEqual, 2),
+						'|' => CreateTokenAndAdvance(SyntaxKind.DoubleBar, 2),
+						_   => CreateTokenAndAdvance(SyntaxKind.Bar, 1)
+					};
+				case ',':
+					return CreateTokenAndAdvance(SyntaxKind.Comma, 1);
+				case '#':
+					_source.Advance();
+					ParseIdentifier();
+					token = CreateToken(SyntaxKind.Directive);
                     SetDirectiveKind(token);
 
-                    if (token.Kind == SyntaxKind.Directive)
-                    {
-                        MakeIssue(IssuesId.UnknownDirective, token, token.Text);
-                    }
+					if (token.Kind == SyntaxKind.Directive)
+					{
+						MakeIssue(IssuesId.UnknownDirective, token, token.Text);
+					}
 
-                    return token;
-            }
+					return token;
+			}
 
-            _source.Advance();
+			_source.Advance();
 
-            if (char.IsLetter(ch))
-            {
-                ParseIdentifier();
-                token = CreateToken(SyntaxKind.Identifier);
+			if (char.IsLetter(ch))
+			{
+				ParseIdentifier();
+				token = CreateToken(SyntaxKind.Identifier);
                 SetKeywordOrIdentifierKind(token);
 
-                return token;
-            }
+				return token;
+			}
 
-            if (char.IsDigit(ch))
-            {
-                ParseNumericalLiteral();
+			if (char.IsDigit(ch))
+			{
+				ParseNumericalLiteral();
 
-                return CreateToken(SyntaxKind.NumericalLiteral);
-            }
+				return CreateToken(SyntaxKind.NumericalLiteral);
+			}
 
-            token = CreateToken(SyntaxKind.Unknown);
-            MakeIssue(IssuesId.UnexpectedToken, token, token.Text);
+			token = CreateToken(SyntaxKind.Unknown);
+			MakeIssue(IssuesId.UnexpectedToken, token, token.Text);
 
-            return token;
-        }
+			return token;
+		}
 
-        /// <summary>
-        ///     Определение типа директивы препроцессора.
-        /// </summary>
-        /// <param name="directive"></param>
-        private void SetDirectiveKind(SyntaxToken directive)
-        {
-            directive.Kind = directive.Text[1..] switch
-            {
-                "define"  => SyntaxKind.DefineDirective,
-                "ifdef"   => SyntaxKind.IfDefDirective,
-                "include" => SyntaxKind.IncludeDirective,
-                "ifndef"  => SyntaxKind.IfNDefDirective,
-                "endif"   => SyntaxKind.EndIfDirective,
-                _         => SyntaxKind.Directive
-            };
-        }
+		/// <summary>
+		///     Определение типа директивы препроцессора.
+		/// </summary>
+		/// <param name="directive"></param>
+		private static void SetDirectiveKind(SyntaxToken directive)
+		{
+			directive.Kind = directive.Text[1..] switch
+			{
+				"define"  => SyntaxKind.DefineDirective,
+				"ifdef"   => SyntaxKind.IfDefDirective,
+				"include" => SyntaxKind.IncludeDirective,
+				"ifndef"  => SyntaxKind.IfNDefDirective,
+				"endif"   => SyntaxKind.EndIfDirective,
+				_         => SyntaxKind.Directive
+			};
+		}
 
-        /// <summary>
-        ///     Определение ключевого слова.
-        /// </summary>
-        /// <param name="identifier"></param>
-        private void SetKeywordOrIdentifierKind(SyntaxToken identifier)
-        {
-            identifier.Kind = identifier.Text switch
-            {
-                "for"    => SyntaxKind.ForKeyword,
-                "new"    => SyntaxKind.NewKeyword,
-                "global" => SyntaxKind.GlobalKeyword,
-                "throw"  => SyntaxKind.ThrowKeyword,
-                "catch"  => SyntaxKind.CatchKeyword,
-                "try"    => SyntaxKind.TryKeyword,
-                "var"    => SyntaxKind.VarKeyword,
-                "verb"   => SyntaxKind.VerbKeyword,
-                "proc"   => SyntaxKind.ProcKeyword,
-                "in"     => SyntaxKind.InKeyword,
-                "if"     => SyntaxKind.IfKeyword,
-                "else"   => SyntaxKind.ElseKeyword,
-                "set"    => SyntaxKind.SetKeyword,
-                "as"     => SyntaxKind.AsKeyword,
-                "while"  => SyntaxKind.WhileKeyword,
-                _        => SyntaxKind.Identifier
-            };
-        }
+		/// <summary>
+		///     Определение ключевого слова.
+		/// </summary>
+		/// <param name="identifier"></param>
+		private static void SetKeywordOrIdentifierKind(SyntaxToken identifier)
+		{
+			identifier.Kind = identifier.Text switch
+			{
+				"for"    => SyntaxKind.ForKeyword,
+				"new"    => SyntaxKind.NewKeyword,
+				"global" => SyntaxKind.GlobalKeyword,
+				"throw"  => SyntaxKind.ThrowKeyword,
+				"catch"  => SyntaxKind.CatchKeyword,
+				"try"    => SyntaxKind.TryKeyword,
+				"var"    => SyntaxKind.VarKeyword,
+				"verb"   => SyntaxKind.VerbKeyword,
+				"proc"   => SyntaxKind.ProcKeyword,
+				"in"     => SyntaxKind.InKeyword,
+				"if"     => SyntaxKind.IfKeyword,
+				"else"   => SyntaxKind.ElseKeyword,
+				"set"    => SyntaxKind.SetKeyword,
+				"as"     => SyntaxKind.AsKeyword,
+				"while"  => SyntaxKind.WhileKeyword,
+				_        => SyntaxKind.Identifier
+			};
+		}
 
-        /// <summary>
-        ///     Парсинг идентификатора.
-        /// </summary>
-        private void ParseIdentifier()
-        {
-            while (true)
-            {
-                if (_source.IsEnd)
-                {
-                    return;
-                }
+		/// <summary>
+		///     Парсинг идентификатора.
+		/// </summary>
+		private void ParseIdentifier()
+		{
+			while (true)
+			{
+				if (_source.IsEnd)
+				{
+					return;
+				}
 
-                var ch = _source.Peek();
+				char ch = _source.Peek();
 
-                if (!char.IsLetter(ch) && ch != '_' && !char.IsDigit(ch))
-                {
-                    return;
-                }
+				if (!char.IsLetter(ch) && ch != '_' && !char.IsDigit(ch))
+				{
+					return;
+				}
 
-                _source.Advance();
-            }
-        }
+				_source.Advance();
+			}
+		}
 
-        /// <summary>
-        ///     Парсинг числового литерала.
-        /// </summary>
-        private void ParseNumericalLiteral()
-        {
-            while (true)
-            {
-                if (_source.IsEnd)
-                {
-                    return;
-                }
+		/// <summary>
+		///     Парсинг числового литерала.
+		/// </summary>
+		private void ParseNumericalLiteral()
+		{
+			while (true)
+			{
+				if (_source.IsEnd)
+				{
+					return;
+				}
 
-                var ch = _source.Peek();
+				char ch = _source.Peek();
 
-                if (!char.IsDigit(ch) && ch != '.')
-                {
-                    return;
-                }
+				if (!char.IsDigit(ch) && ch != '.')
+				{
+					return;
+				}
 
-                _source.Advance();
-            }
-        }
+				_source.Advance();
+			}
+		}
 
-        /// <summary>
-        ///     Парсинг текстового литерала.
-        /// </summary>
-        /// <returns></returns>
-        private bool ParseTextLiteral()
-        {
-            while (true)
-            {
-                if (_source.IsEnd)
-                {
-                    return false;
-                }
+		/// <summary>
+		///     Парсинг текстового литерала.
+		/// </summary>
+		/// <returns></returns>
+		private bool ParseTextLiteral()
+		{
+			while (true)
+			{
+				if (_source.IsEnd)
+				{
+					return false;
+				}
 
-                if (_source.Read() == '\"')
-                {
-                    return true;
-                }
-            }
-        }
+				char ch   = _source.Read();
+				char next = _source.Peek();
 
-        /// <summary>
-        ///     Парсинг литерала пути.
-        /// </summary>
-        /// <returns></returns>
-        private bool ParsePathLiteral()
-        {
-            while (true)
-            {
-                if (_source.IsEnd)
-                {
-                    return false;
-                }
+				if (ch == '\\' && next == '\"')
+				{
+					_source.Advance();
 
-                if (_source.Read() == '\'')
-                {
-                    return true;
-                }
-            }
-        }
+					continue;
+				}
 
-        private SyntaxToken CreateTokenAndAdvance(SyntaxKind kind, int length)
-        {
-            _source.Advance(length);
+				if (ch == '\"')
+				{
+					return true;
+				}
+			}
+		}
 
-            return new(kind, _source.LexemeText, _source.Position, _source.LexemeFilePosition);
-        }
+		/// <summary>
+		///     Парсинг литерала пути.
+		/// </summary>
+		/// <returns></returns>
+		private bool ParsePathLiteral()
+		{
+			while (true)
+			{
+				if (_source.IsEnd)
+				{
+					return false;
+				}
 
-        private SyntaxToken CreateToken(SyntaxKind kind)
-        {
-            return new(kind, _source.LexemeText, _source.Position, _source.LexemeFilePosition);
-        }
+				if (_source.Read() == '\'')
+				{
+					return true;
+				}
+			}
+		}
 
-        /// <summary>
-        ///     Парсинг ведущих и хвостовых токенов.
-        /// </summary>
-        /// <param name="isTrail">true - если производится парсинг хвостовых токенов.</param>
-        /// <param name="trivia">Лист, куда будут добавлены найденные токены.</param>
-        private void ParseTokenTrivia(bool isTrail, List<SyntaxToken> trivia)
-        {
-            while (true)
-            {
-                _source.Start();
+		private SyntaxToken CreateTokenAndAdvance(SyntaxKind kind, int length)
+		{
+			_source.Advance(length);
 
-                if (_source.IsEnd)
-                {
-                    return;
-                }
+			return new SyntaxToken(kind, _source.LexemeText, _source.Position, _source.LexemeFilePosition);
+		}
 
-                var ch   = _source.Peek();
-                var next = _source.Peek(2);
+		private SyntaxToken CreateToken(SyntaxKind kind)
+		{
+			return new(kind, _source.LexemeText, _source.Position, _source.LexemeFilePosition);
+		}
 
-                switch (ch)
-                {
-                    case '/':
-                        if (isTrail)
-                        {
-                            return;
-                        }
+		/// <summary>
+		///     Парсинг ведущих и хвостовых токенов.
+		/// </summary>
+		/// <param name="isTrail">true - если производится парсинг хвостовых токенов.</param>
+		/// <param name="trivia">Лист, куда будут добавлены найденные токены.</param>
+		private void ParseTokenTrivia(bool isTrail, List<SyntaxToken> trivia)
+		{
+			while (true)
+			{
+				_source.Start();
 
-                        switch (next)
-                        {
-                            case '/':
-                                _source.Advance(2);
-                                SkipToEndOfLine();
-                                trivia.Add(CreateToken(SyntaxKind.SingleLineComment));
+				if (_source.IsEnd)
+				{
+					return;
+				}
 
-                                break;
-                            case '*':
-                                _source.Advance(2);
-                                var endFounded = SkipToEndOfMultiLineComment();
-                                var comment    = CreateToken(SyntaxKind.MultiLineComment);
+				char ch   = _source.Peek();
+				char next = _source.Peek(2);
 
-                                if (!endFounded)
-                                {
-                                    MakeIssue(IssuesId.MissingClosingSign, comment, "/*");
-                                }
+				switch (ch)
+				{
+					case '/':
+						if (isTrail)
+						{
+							return;
+						}
 
-                                trivia.Add(comment);
+						switch (next)
+						{
+							case '/':
+								_source.Advance(2);
+								SkipToEndOfLine();
+								trivia.Add(CreateToken(SyntaxKind.SingleLineComment));
 
-                                break;
-                            default:
-                                return;
-                        }
+								break;
+							case '*':
+								_source.Advance(2);
+								bool         endFounded = SkipToEndOfMultiLineComment();
+								SyntaxToken comment    = CreateToken(SyntaxKind.MultiLineComment);
 
-                        break;
-                    case ' ':
-                    case '\t':
-                    case '\v':
-                    case '\f':
-                    case '\u00A0':
-                    case '\uFEFF':
-                    case '\u001A':
-                        SkipWhiteSpaces();
-                        trivia.Add(CreateToken(SyntaxKind.WhiteSpace));
+								if (!endFounded)
+								{
+									MakeIssue(IssuesId.MissingClosingSign, comment, "/*");
+								}
 
-                        break;
-                    case '\r':
-                        switch (next)
-                        {
-                            case '\n':
-                                trivia.Add(CreateTokenAndAdvance(SyntaxKind.EndOfLine, 2));
+								trivia.Add(comment);
 
-                                break;
-                        }
+								break;
+							default:
+								return;
+						}
 
-                        break;
-                    case '\n':
-                        trivia.Add(CreateTokenAndAdvance(SyntaxKind.EndOfLine, 1));
+						break;
+					case ' ':
+					case '\t':
+					case '\v':
+					case '\f':
+					case '\u00A0':
+					case '\uFEFF':
+					case '\u001A':
+						SkipWhiteSpaces();
+						trivia.Add(CreateToken(SyntaxKind.WhiteSpace));
 
-                        break;
-                    case '.':
-                        trivia.Add(CreateTokenAndAdvance(SyntaxKind.Dot, 1));
+						break;
+					case '\r':
+						switch (next)
+						{
+							case '\n':
+								trivia.Add(CreateTokenAndAdvance(SyntaxKind.EndOfLine, 2));
 
-                        break;
-                    default:
-                        return;
-                }
-            }
-        }
+								break;
+						}
 
-        /// <summary>
-        ///     Пропуск пустот, пробелов, табуляции и т.д.
-        /// </summary>
-        private void SkipWhiteSpaces()
-        {
-            while (!_source.IsEnd)
-            {
-                var ch = _source.Peek();
+						break;
+					case '\n':
+						trivia.Add(CreateTokenAndAdvance(SyntaxKind.EndOfLine, 1));
 
-                if (ch != ' ' && ch != '\t')
-                {
-                    return;
-                }
+						break;
+					case '.':
+						trivia.Add(CreateTokenAndAdvance(SyntaxKind.Dot, 1));
 
-                _source.Advance();
-            }
-        }
+						break;
+					default:
+						return;
+				}
+			}
+		}
 
-        /// <summary>
-        ///     Пропуск до конца многострочного комментария.
-        /// </summary>
-        /// <returns></returns>
-        private bool SkipToEndOfMultiLineComment()
-        {
-            while (true)
-            {
-                if (_source.IsEnd)
-                {
-                    return false;
-                }
+		/// <summary>
+		///     Пропуск пустот, пробелов, табуляции и т.д.
+		/// </summary>
+		private void SkipWhiteSpaces()
+		{
+			while (!_source.IsEnd)
+			{
+				char ch = _source.Peek();
 
-                var ch = _source.Read();
+				if (ch != ' ' && ch != '\t')
+				{
+					return;
+				}
 
-                switch (ch)
-                {
-                    case '*':
-                        if (_source.Peek() == '/')
-                        {
-                            _source.Advance();
+				_source.Advance();
+			}
+		}
 
-                            return true;
-                        }
+		/// <summary>
+		///     Пропуск до конца многострочного комментария.
+		/// </summary>
+		/// <returns></returns>
+		private bool SkipToEndOfMultiLineComment()
+		{
+			while (true)
+			{
+				if (_source.IsEnd)
+				{
+					return false;
+				}
 
-                        break;
-                }
-            }
-        }
+				char ch = _source.Read();
 
-        /// <summary>
-        ///     Пропуск до конца однострочного комментария.
-        /// </summary>
-        private void SkipToEndOfLine()
-        {
-            while (!_source.IsEnd)
-            {
-                var ch = _source.Peek();
+				switch (ch)
+				{
+					case '*':
+						if (_source.Peek() == '/')
+						{
+							_source.Advance();
 
-                if (ch == '\n')
-                {
-                    return;
-                }
+							return true;
+						}
 
-                _source.Advance();
-            }
-        }
+						break;
+				}
+			}
+		}
 
-        public override string ToString()
-        {
-            var result = new StringBuilder();
+		/// <summary>
+		///     Пропуск до конца однострочного комментария.
+		/// </summary>
+		private void SkipToEndOfLine()
+		{
+			while (!_source.IsEnd)
+			{
+				char ch = _source.Peek();
 
-            foreach (var token in _tokens)
-            {
-                result.Append($"{token.Text}");
-            }
+				if (ch == '\n')
+				{
+					return;
+				}
 
-            return result.ToString();
-        }
-    }
+				_source.Advance();
+			}
+		}
+
+		public override string ToString()
+		{
+			var result = new StringBuilder();
+
+			foreach (var token in _tokens)
+			{
+				result.Append($"{token.Text}");
+			}
+
+			return result.ToString();
+		}
+	}
 }

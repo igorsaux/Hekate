@@ -6,13 +6,13 @@ using Xunit;
 
 namespace ChaoticOnyx.Hekate.Parser.Tests
 {
-    public class EmitingTests
-    {
-        [Fact]
-        public void EmitTest()
-        {
-            // Arrange
-            var expected = @"/*
+	public class EmitingTests
+	{
+		[Fact]
+		public void EmitTest()
+		{
+			// Arrange
+			var expected = @"/*
 	These are simple defaults for your project.
  */
 #ifndef TEST
@@ -40,14 +40,14 @@ obj
 hello_world()
 ";
 
-            var unit = new CompilationUnit(expected);
+			var unit = new CompilationUnit(expected);
 
-            // Act
-            unit.Parse();
-            var result = unit.Emit();
+			// Act
+			unit.Parse();
+			string result = unit.Emit();
 
-            // Assert
-            Assert.Equal(expected, result);
-        }
-    }
+			// Assert
+			Assert.Equal(expected, result);
+		}
+	}
 }
