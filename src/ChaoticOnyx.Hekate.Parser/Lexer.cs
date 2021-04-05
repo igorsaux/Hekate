@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 
@@ -24,12 +23,12 @@ namespace ChaoticOnyx.Hekate.Parser
 		/// <summary>
 		///     Токены в единице компиляции.
 		/// </summary>
-		public ReadOnlyCollection<SyntaxToken> Tokens => _tokens.AsReadOnly();
+		public IList<SyntaxToken> Tokens => _tokens.AsReadOnly();
 
 		/// <summary>
 		///     Проблемы обнаруженные в единице компиляции.
 		/// </summary>
-		public ReadOnlyCollection<CodeIssue> Issues => _issues.AsReadOnly();
+		public IReadOnlyCollection<CodeIssue> Issues => _issues.AsReadOnly();
 
 		/// <summary>
 		///     Создание нового лексера из текста.
@@ -52,6 +51,51 @@ namespace ChaoticOnyx.Hekate.Parser
 		}
 
 		/// <summary>
+		///     Определение типа директивы препроцессора.
+		/// </summary>
+		/// <param name="directive"></param>
+		private static void SetDirectiveKind(SyntaxToken directive)
+		{
+			directive.Kind = directive.Text[1..] switch
+			{
+				"define"  => SyntaxKind.DefineDirective,
+				"ifdef"   => SyntaxKind.IfDefDirective,
+				"include" => SyntaxKind.IncludeDirective,
+				"ifndef"  => SyntaxKind.IfNDefDirective,
+				"endif"   => SyntaxKind.EndIfDirective,
+				"undef"   => SyntaxKind.UndefDirective,
+				_         => SyntaxKind.Directive
+			};
+		}
+
+		/// <summary>
+		///     Определение ключевого слова.
+		/// </summary>
+		/// <param name="identifier"></param>
+		private static void SetKeywordOrIdentifierKind(SyntaxToken identifier)
+		{
+			identifier.Kind = identifier.Text switch
+			{
+				"for"    => SyntaxKind.ForKeyword,
+				"new"    => SyntaxKind.NewKeyword,
+				"global" => SyntaxKind.GlobalKeyword,
+				"throw"  => SyntaxKind.ThrowKeyword,
+				"catch"  => SyntaxKind.CatchKeyword,
+				"try"    => SyntaxKind.TryKeyword,
+				"var"    => SyntaxKind.VarKeyword,
+				"verb"   => SyntaxKind.VerbKeyword,
+				"proc"   => SyntaxKind.ProcKeyword,
+				"in"     => SyntaxKind.InKeyword,
+				"if"     => SyntaxKind.IfKeyword,
+				"else"   => SyntaxKind.ElseKeyword,
+				"set"    => SyntaxKind.SetKeyword,
+				"as"     => SyntaxKind.AsKeyword,
+				"while"  => SyntaxKind.WhileKeyword,
+				_        => SyntaxKind.Identifier
+			};
+		}
+
+		/// <summary>
 		///     Выполнение лексического парсинга исходного кода. При вызове функции все данные с предыдущего парсинга обнуляются.
 		/// </summary>
 		public void Parse()
@@ -63,10 +107,7 @@ namespace ChaoticOnyx.Hekate.Parser
 				SyntaxToken token = Lex();
 				_tokens.Add(token);
 
-				if (token.Kind == SyntaxKind.EndOfFile)
-				{
-					return;
-				}
+				if (token.Kind == SyntaxKind.EndOfFile) { return; }
 			}
 		}
 
@@ -78,10 +119,7 @@ namespace ChaoticOnyx.Hekate.Parser
 		{
 			StringBuilder builder = new();
 
-			foreach (var token in _tokens)
-			{
-				builder.Append(token.FullText);
-			}
+			foreach (var token in _tokens) { builder.Append(token.FullText); }
 
 			return builder.ToString();
 		}
@@ -129,10 +167,7 @@ namespace ChaoticOnyx.Hekate.Parser
 		{
 			_source.Start();
 
-			if (_source.IsEnd)
-			{
-				return CreateTokenAndAdvance(SyntaxKind.EndOfFile, 0);
-			}
+			if (_source.IsEnd) { return CreateTokenAndAdvance(SyntaxKind.EndOfFile, 0); }
 
 			char        ch            = _source.Peek();
 			var         parsingResult = false;
@@ -241,10 +276,7 @@ namespace ChaoticOnyx.Hekate.Parser
 					parsingResult = ParsePathLiteral();
 					token         = CreateToken(SyntaxKind.PathLiteral);
 
-					if (!parsingResult)
-					{
-						MakeIssue(IssuesId.MissingClosingSign, token, token.Text);
-					}
+					if (!parsingResult) { MakeIssue(IssuesId.MissingClosingSign, token, token.Text); }
 
 					return token;
 				case '\"':
@@ -252,10 +284,7 @@ namespace ChaoticOnyx.Hekate.Parser
 					parsingResult = ParseTextLiteral();
 					token         = CreateToken(SyntaxKind.TextLiteral);
 
-					if (!parsingResult)
-					{
-						MakeIssue(IssuesId.MissingClosingSign, token, token.Text);
-					}
+					if (!parsingResult) { MakeIssue(IssuesId.MissingClosingSign, token, token.Text); }
 
 					return token;
 				case '%':
@@ -294,12 +323,9 @@ namespace ChaoticOnyx.Hekate.Parser
 					_source.Advance();
 					ParseIdentifier();
 					token = CreateToken(SyntaxKind.Directive);
-                    SetDirectiveKind(token);
+					SetDirectiveKind(token);
 
-					if (token.Kind == SyntaxKind.Directive)
-					{
-						MakeIssue(IssuesId.UnknownDirective, token, token.Text);
-					}
+					if (token.Kind == SyntaxKind.Directive) { MakeIssue(IssuesId.UnknownDirective, token, token.Text); }
 
 					return token;
 			}
@@ -310,7 +336,7 @@ namespace ChaoticOnyx.Hekate.Parser
 			{
 				ParseIdentifier();
 				token = CreateToken(SyntaxKind.Identifier);
-                SetKeywordOrIdentifierKind(token);
+				SetKeywordOrIdentifierKind(token);
 
 				return token;
 			}
@@ -329,67 +355,17 @@ namespace ChaoticOnyx.Hekate.Parser
 		}
 
 		/// <summary>
-		///     Определение типа директивы препроцессора.
-		/// </summary>
-		/// <param name="directive"></param>
-		private static void SetDirectiveKind(SyntaxToken directive)
-		{
-			directive.Kind = directive.Text[1..] switch
-			{
-				"define"  => SyntaxKind.DefineDirective,
-				"ifdef"   => SyntaxKind.IfDefDirective,
-				"include" => SyntaxKind.IncludeDirective,
-				"ifndef"  => SyntaxKind.IfNDefDirective,
-				"endif"   => SyntaxKind.EndIfDirective,
-				_         => SyntaxKind.Directive
-			};
-		}
-
-		/// <summary>
-		///     Определение ключевого слова.
-		/// </summary>
-		/// <param name="identifier"></param>
-		private static void SetKeywordOrIdentifierKind(SyntaxToken identifier)
-		{
-			identifier.Kind = identifier.Text switch
-			{
-				"for"    => SyntaxKind.ForKeyword,
-				"new"    => SyntaxKind.NewKeyword,
-				"global" => SyntaxKind.GlobalKeyword,
-				"throw"  => SyntaxKind.ThrowKeyword,
-				"catch"  => SyntaxKind.CatchKeyword,
-				"try"    => SyntaxKind.TryKeyword,
-				"var"    => SyntaxKind.VarKeyword,
-				"verb"   => SyntaxKind.VerbKeyword,
-				"proc"   => SyntaxKind.ProcKeyword,
-				"in"     => SyntaxKind.InKeyword,
-				"if"     => SyntaxKind.IfKeyword,
-				"else"   => SyntaxKind.ElseKeyword,
-				"set"    => SyntaxKind.SetKeyword,
-				"as"     => SyntaxKind.AsKeyword,
-				"while"  => SyntaxKind.WhileKeyword,
-				_        => SyntaxKind.Identifier
-			};
-		}
-
-		/// <summary>
 		///     Парсинг идентификатора.
 		/// </summary>
 		private void ParseIdentifier()
 		{
 			while (true)
 			{
-				if (_source.IsEnd)
-				{
-					return;
-				}
+				if (_source.IsEnd) { return; }
 
 				char ch = _source.Peek();
 
-				if (!char.IsLetter(ch) && ch != '_' && !char.IsDigit(ch))
-				{
-					return;
-				}
+				if (!char.IsLetter(ch) && ch != '_' && !char.IsDigit(ch)) { return; }
 
 				_source.Advance();
 			}
@@ -402,17 +378,11 @@ namespace ChaoticOnyx.Hekate.Parser
 		{
 			while (true)
 			{
-				if (_source.IsEnd)
-				{
-					return;
-				}
+				if (_source.IsEnd) { return; }
 
 				char ch = _source.Peek();
 
-				if (!char.IsDigit(ch) && ch != '.')
-				{
-					return;
-				}
+				if (!char.IsDigit(ch) && ch != '.') { return; }
 
 				_source.Advance();
 			}
@@ -426,10 +396,7 @@ namespace ChaoticOnyx.Hekate.Parser
 		{
 			while (true)
 			{
-				if (_source.IsEnd)
-				{
-					return false;
-				}
+				if (_source.IsEnd) { return false; }
 
 				char ch   = _source.Read();
 				char next = _source.Peek();
@@ -441,10 +408,7 @@ namespace ChaoticOnyx.Hekate.Parser
 					continue;
 				}
 
-				if (ch == '\"')
-				{
-					return true;
-				}
+				if (ch == '\"') { return true; }
 			}
 		}
 
@@ -456,15 +420,9 @@ namespace ChaoticOnyx.Hekate.Parser
 		{
 			while (true)
 			{
-				if (_source.IsEnd)
-				{
-					return false;
-				}
+				if (_source.IsEnd) { return false; }
 
-				if (_source.Read() == '\'')
-				{
-					return true;
-				}
+				if (_source.Read() == '\'') { return true; }
 			}
 		}
 
@@ -491,10 +449,7 @@ namespace ChaoticOnyx.Hekate.Parser
 			{
 				_source.Start();
 
-				if (_source.IsEnd)
-				{
-					return;
-				}
+				if (_source.IsEnd) { return; }
 
 				char ch   = _source.Peek();
 				char next = _source.Peek(2);
@@ -502,10 +457,7 @@ namespace ChaoticOnyx.Hekate.Parser
 				switch (ch)
 				{
 					case '/':
-						if (isTrail)
-						{
-							return;
-						}
+						if (isTrail) { return; }
 
 						switch (next)
 						{
@@ -517,13 +469,10 @@ namespace ChaoticOnyx.Hekate.Parser
 								break;
 							case '*':
 								_source.Advance(2);
-								bool         endFounded = SkipToEndOfMultiLineComment();
+								bool        endFounded = SkipToEndOfMultiLineComment();
 								SyntaxToken comment    = CreateToken(SyntaxKind.MultiLineComment);
 
-								if (!endFounded)
-								{
-									MakeIssue(IssuesId.MissingClosingSign, comment, "/*");
-								}
+								if (!endFounded) { MakeIssue(IssuesId.MissingClosingSign, comment, "/*"); }
 
 								trivia.Add(comment);
 
@@ -577,10 +526,7 @@ namespace ChaoticOnyx.Hekate.Parser
 			{
 				char ch = _source.Peek();
 
-				if (ch != ' ' && ch != '\t')
-				{
-					return;
-				}
+				if (ch != ' ' && ch != '\t') { return; }
 
 				_source.Advance();
 			}
@@ -594,10 +540,7 @@ namespace ChaoticOnyx.Hekate.Parser
 		{
 			while (true)
 			{
-				if (_source.IsEnd)
-				{
-					return false;
-				}
+				if (_source.IsEnd) { return false; }
 
 				char ch = _source.Read();
 
@@ -625,10 +568,7 @@ namespace ChaoticOnyx.Hekate.Parser
 			{
 				char ch = _source.Peek();
 
-				if (ch == '\n')
-				{
-					return;
-				}
+				if (ch == '\n') { return; }
 
 				_source.Advance();
 			}
@@ -638,10 +578,7 @@ namespace ChaoticOnyx.Hekate.Parser
 		{
 			var result = new StringBuilder();
 
-			foreach (var token in _tokens)
-			{
-				result.Append($"{token.Text}");
-			}
+			foreach (var token in _tokens) { result.Append($"{token.Text}"); }
 
 			return result.ToString();
 		}

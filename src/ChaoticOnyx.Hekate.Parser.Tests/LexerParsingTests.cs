@@ -1,6 +1,6 @@
 ﻿#region
 
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -20,7 +20,7 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
 
 			// Act
 			unit.Parse();
-			ReadOnlyCollection<SyntaxToken> tokens = unit.Lexer.Tokens;
+			IList<SyntaxToken> tokens = unit.Lexer.Tokens;
 			Assert.True(tokens.Count == 1);
 
 			Assert.True(tokens[0]
@@ -49,7 +49,7 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
 
 			// Act
 			unit.Parse();
-			ReadOnlyCollection<SyntaxToken> tokens = unit.Lexer.Tokens;
+			IList<SyntaxToken> tokens = unit.Lexer.Tokens;
 
 			// Assert
 			Assert.True(tokens.Count == 2);
@@ -69,7 +69,7 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
 
 			// Act
 			unit.Parse();
-			ReadOnlyCollection<SyntaxToken> tokens = unit.Lexer.Tokens;
+			IList<SyntaxToken> tokens = unit.Lexer.Tokens;
 
 			// Assert
 			Assert.True(tokens.Count == 2);
@@ -89,7 +89,7 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
 
 			// Act
 			unit.Parse();
-			ReadOnlyCollection<SyntaxToken> tokens = unit.Lexer.Tokens;
+			IList<SyntaxToken> tokens = unit.Lexer.Tokens;
 
 			// Assert
 			Assert.True(tokens.Count == 2);
@@ -109,7 +109,7 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
 
 			// Act
 			unit.Parse();
-			ReadOnlyCollection<SyntaxToken> tokens = unit.Lexer.Tokens;
+			IList<SyntaxToken> tokens = unit.Lexer.Tokens;
 
 			// Assert
 			Assert.True(tokens.Count == 2);
@@ -126,7 +126,7 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
 
 			// Act
 			unit.Parse();
-			ReadOnlyCollection<SyntaxToken> tokens = unit.Lexer.Tokens;
+			IList<SyntaxToken> tokens = unit.Lexer.Tokens;
 
 			// Assert
 			Assert.True(tokens.Count == 2);
@@ -143,7 +143,7 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
 
 			// Act
 			unit.Parse();
-			ReadOnlyCollection<SyntaxToken> tokens = unit.Lexer.Tokens;
+			IList<SyntaxToken> tokens = unit.Lexer.Tokens;
 
 			// Assert
 			Assert.True(tokens.Count == 1);
@@ -166,17 +166,18 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
 		[InlineData(SyntaxKind.IfDefDirective)]
 		[InlineData(SyntaxKind.EndIfDirective)]
 		[InlineData(SyntaxKind.DefineDirective)]
+		[InlineData(SyntaxKind.UndefDirective)]
 		public void DirectiveParsing(SyntaxKind kind)
 		{
 			// Arrange
-			CompilationUnit unit = new("#include #ifndef #ifdef #endif #define");
+			CompilationUnit unit = new("#include #ifndef #ifdef #endif #define #undef");
 
 			// Act
 			unit.Parse();
-			ReadOnlyCollection<SyntaxToken> tokens = unit.Lexer.Tokens;
+			IList<SyntaxToken> tokens = unit.Lexer.Tokens;
 
 			// Assert
-			Assert.True(tokens.Count == 6);
+			Assert.True(tokens.Count == 7);
 			Assert.True(tokens.Count(t => t.Kind == kind) == 1);
 		}
 
@@ -203,7 +204,7 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
 
 			// Act
 			unit.Parse();
-			ReadOnlyCollection<SyntaxToken> tokens = unit.Lexer.Tokens;
+			IList<SyntaxToken> tokens = unit.Lexer.Tokens;
 
 			// Assert
 			Assert.True(tokens.Count == 16);
@@ -263,8 +264,8 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
 
 			// Act
 			unit.Parse();
-			ReadOnlyCollection<SyntaxToken> tokens = unit.Lexer.Tokens;
-			int                             count  = tokens.Count(token => token.Kind == kind);
+			IList<SyntaxToken> tokens = unit.Lexer.Tokens;
+			int                count  = tokens.Count(token => token.Kind == kind);
 
 			// Assert
 			Assert.Equal(expectedCount, count);
@@ -301,7 +302,7 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
 
 			// Act
 			unit.Parse();
-			ReadOnlyCollection<SyntaxToken> tokens = unit.Lexer.Tokens;
+			IList<SyntaxToken> tokens = unit.Lexer.Tokens;
 
 			// Assert
 			Assert.True(tokens.Count == 6);

@@ -27,10 +27,7 @@ namespace ChaoticOnyx.Hekate.Parser
 		{
 			SyntaxToken token = new(SyntaxKind.EndOfFile, string.Empty);
 
-			if (Style.LastEmptyLine)
-			{
-				token.WithLeads(EndOfLine(ending));
-			}
+			if (Style.LastEmptyLine) { token.WithLeads(EndOfLine(ending)); }
 
 			return token;
 		}

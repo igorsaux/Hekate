@@ -1,6 +1,7 @@
 ﻿#region
 
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 #endregion
@@ -17,13 +18,13 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
 
 			// Act
 			unit.Parse();
-			ReadOnlyCollection<CodeIssue> errors = unit.Lexer.Issues;
+			IReadOnlyCollection<CodeIssue> errors = unit.Lexer.Issues;
 
 			// Assert
 			Assert.True(errors.Count == 1);
 
-			Assert.True(errors[0]
-							.Id == IssuesId.MissingClosingSign);
+			Assert.True(errors.First()
+							  .Id == IssuesId.MissingClosingSign);
 		}
 
 		[Fact]
@@ -34,13 +35,13 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
 
 			// Act
 			unit.Parse();
-			ReadOnlyCollection<CodeIssue> errors = unit.Lexer.Issues;
+			IReadOnlyCollection<CodeIssue> errors = unit.Lexer.Issues;
 
 			// Assert
 			Assert.True(errors.Count == 1);
 
-			Assert.True(errors[0]
-							.Id == IssuesId.MissingClosingSign);
+			Assert.True(errors.First()
+							  .Id == IssuesId.MissingClosingSign);
 		}
 
 		[Fact]
@@ -51,13 +52,13 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
 
 			// Act
 			unit.Parse();
-			ReadOnlyCollection<CodeIssue> errors = unit.Lexer.Issues;
+			IReadOnlyCollection<CodeIssue> errors = unit.Lexer.Issues;
 
 			// Assert
 			Assert.True(errors.Count == 1);
 
-			Assert.True(errors[0]
-							.Id == IssuesId.MissingClosingSign);
+			Assert.True(errors.First()
+							  .Id == IssuesId.MissingClosingSign);
 		}
 
 		[Fact]
@@ -68,13 +69,13 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
 
 			// Act
 			unit.Parse();
-			ReadOnlyCollection<CodeIssue> errors = unit.Lexer.Issues;
+			IReadOnlyCollection<CodeIssue> errors = unit.Lexer.Issues;
 
 			// Assert
 			Assert.True(errors.Count == 1);
 
-			Assert.True(errors[0]
-							.Id == IssuesId.UnexpectedToken);
+			Assert.True(errors.First()
+							  .Id == IssuesId.UnexpectedToken);
 		}
 
 		[Fact]
@@ -85,13 +86,13 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
 
 			// Act
 			unit.Parse();
-			ReadOnlyCollection<CodeIssue> errors = unit.Lexer.Issues;
+			IReadOnlyCollection<CodeIssue> errors = unit.Lexer.Issues;
 
 			// Assert
 			Assert.True(errors.Count == 1);
 
-			Assert.True(errors[0]
-							.Id == IssuesId.UnknownDirective);
+			Assert.True(errors.First()
+							  .Id == IssuesId.UnknownDirective);
 		}
 	}
 }

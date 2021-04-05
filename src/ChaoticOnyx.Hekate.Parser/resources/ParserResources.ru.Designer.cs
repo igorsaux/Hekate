@@ -61,7 +61,7 @@ namespace ChaoticOnyx.Hekate.Parser.resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Отсутствует закрывающий знак для {0}..
+        ///   Looks up a localized string similar to Отсутствует закрывающий знак для `{0}`..
         /// </summary>
         public static string DM0001 {
             get {
@@ -70,7 +70,7 @@ namespace ChaoticOnyx.Hekate.Parser.resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Неожиданный токен {0}..
+        ///   Looks up a localized string similar to Неожиданный токен `{0}`..
         /// </summary>
         public static string DM0002 {
             get {
@@ -79,11 +79,38 @@ namespace ChaoticOnyx.Hekate.Parser.resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Неизвестная директива {0}..
+        ///   Looks up a localized string similar to Неизвестная директива `{0}`..
         /// </summary>
         public static string DM0003 {
             get {
                 return ResourceManager.GetString("DM0003", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Неизвестное определение макроса `{0}`..
+        /// </summary>
+        public static string DM1001 {
+            get {
+                return ResourceManager.GetString("DM1001", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to #endif для `{0}` не найден..
+        /// </summary>
+        public static string DM1002 {
+            get {
+                return ResourceManager.GetString("DM1002", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Найден лишний #endif..
+        /// </summary>
+        public static string DM1003 {
+            get {
+                return ResourceManager.GetString("DM1003", resourceCulture);
             }
         }
         

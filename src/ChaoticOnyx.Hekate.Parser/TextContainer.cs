@@ -17,7 +17,8 @@ namespace ChaoticOnyx.Hekate.Parser
 		private int _positionLine = 1;
 
 		public string LexemeText
-			=> new(List.GetRange(Position, Offset - Position)
+			=> new(List.ToList()
+					   .GetRange(Position, Offset - Position)
 					   .ToArray());
 
 		/// <summary>
@@ -54,14 +55,8 @@ namespace ChaoticOnyx.Hekate.Parser
 				_offsetLine   += 1;
 				_offsetColumn =  1;
 			}
-			else if (@char == '\t')
-			{
-				_offsetColumn += TabWidth;
-			}
-			else
-			{
-				_offsetColumn += 1;
-			}
+			else if (@char == '\t') { _offsetColumn += TabWidth; }
+			else { _offsetColumn                    += 1; }
 
 			return @char;
 		}
@@ -80,14 +75,8 @@ namespace ChaoticOnyx.Hekate.Parser
 					_offsetLine   += 1;
 					_offsetColumn =  1;
 				}
-				else if (@char == '\t')
-				{
-					_offsetColumn += TabWidth;
-				}
-				else
-				{
-					_offsetColumn += 1;
-				}
+				else if (@char == '\t') { _offsetColumn += TabWidth; }
+				else { _offsetColumn                    += 1; }
 
 				Offset += 1;
 			}

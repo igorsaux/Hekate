@@ -130,17 +130,11 @@ namespace ChaoticOnyx.Hekate.Parser
 		{
 			StringBuilder builder = new();
 
-			foreach (var lead in _leadTokens)
-			{
-				builder.Append(lead.FullText);
-			}
+			foreach (var lead in _leadTokens) { builder.Append(lead.FullText); }
 
 			builder.Append(Text);
 
-			foreach (var trail in _trailTokens)
-			{
-				builder.Append(trail.FullText);
-			}
+			foreach (var trail in _trailTokens) { builder.Append(trail.FullText); }
 
 			return builder.ToString();
 		}

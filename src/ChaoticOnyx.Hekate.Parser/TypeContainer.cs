@@ -21,7 +21,7 @@ namespace ChaoticOnyx.Hekate.Parser
 		/// <summary>
 		///     Коллекция контейнера.
 		/// </summary>
-		public List<T> List { get; }
+		public IList<T> List { get; }
 
 		/// <summary>
 		///     Отступ от начала коллекции.
@@ -44,7 +44,7 @@ namespace ChaoticOnyx.Hekate.Parser
 			Length = List.Count;
 		}
 
-		public TypeContainer(List<T> list)
+		public TypeContainer(IList<T> list)
 		{
 			List   = list;
 			Length = List.Count;

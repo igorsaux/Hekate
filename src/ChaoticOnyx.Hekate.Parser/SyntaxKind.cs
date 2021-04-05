@@ -58,6 +58,7 @@
 		IfDefDirective,
 		IfNDefDirective,
 		EndIfDirective,
+		UndefDirective,
 
 		#endregion
 
