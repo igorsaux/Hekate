@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31019.35
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChaoticOnyx.Hekate.Parser", "src\ChaoticOnyx.Hekate.Parser\ChaoticOnyx.Hekate.Parser.csproj", "{B18CAD4D-1C95-44D4-ACEF-A405AD95AACB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChaoticOnyx.Hekate", "src\ChaoticOnyx.Hekate\ChaoticOnyx.Hekate.csproj", "{B18CAD4D-1C95-44D4-ACEF-A405AD95AACB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChaoticOnyx.Hekate.Parser.Tests", "src\ChaoticOnyx.Hekate.Parser.Tests\ChaoticOnyx.Hekate.Parser.Tests.csproj", "{4A749EE3-1BD1-4531-9A00-4DFFC223DDB5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChaoticOnyx.Hekate.Tests", "src\ChaoticOnyx.Hekate.Tests\ChaoticOnyx.Hekate.Tests.csproj", "{4A749EE3-1BD1-4531-9A00-4DFFC223DDB5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
