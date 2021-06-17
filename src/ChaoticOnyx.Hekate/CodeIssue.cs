@@ -1,4 +1,6 @@
-﻿namespace ChaoticOnyx.Hekate
+﻿using System.Text;
+
+namespace ChaoticOnyx.Hekate
 {
     /// <summary>
     ///     Проблемы встречаемые в коде.
@@ -20,6 +22,22 @@
             Id        = id;
             Token     = token;
             Arguments = args;
+        }
+
+        /// <summary>
+        ///     Создаёт и форматирует сообщение об ошибке в формате filePath:line:column message.
+        /// </summary>
+        /// <param name="filePath">Путь до файла.</param>
+        /// <param name="message">Сообщение для вывода.</param>
+        /// <returns>Отформатированное сообщение об ошибке.</returns>
+        public string FormatMessage(string filePath, string message)
+        {
+            var           position = Token.FilePosition;
+            StringBuilder sb       = new(message.Length);
+            sb.Append($"{filePath}:{position.Line.ToString()}:{position.Column.ToString()} ");
+            sb.AppendFormat(message, Arguments);
+
+            return sb.ToString();
         }
     }
 }
