@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Immutable;
 using System.Linq;
 using Xunit;
 
@@ -6,7 +6,7 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
 {
     public class PreprocessorTests
     {
-        private static IList<SyntaxToken> ParseText(string text)
+        private static IImmutableList<SyntaxToken> ParseText(string text)
         {
             CompilationUnit unit = CompilationUnit.FromSource(text);
 
@@ -17,8 +17,8 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
         public void UnknownMacrosDefinitionTest()
         {
             // Arrange
-            IList<SyntaxToken> tokens       = ParseText("#undef macro");
-            Preprocessor       preprocessor = Preprocessor.WithTokens(tokens);
+            IImmutableList<SyntaxToken> tokens       = ParseText("#undef macro");
+            Preprocessor                preprocessor = Preprocessor.WithTokens(tokens);
 
             // Act
             preprocessor.Preprocess();
@@ -39,7 +39,7 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
         public void MissingEndIfForIfDefTest()
         {
             // Arrange
-            IList<SyntaxToken> tokens = ParseText(@"#ifdef debug
+            IImmutableList<SyntaxToken> tokens = ParseText(@"#ifdef debug
 #define macro");
 
             Preprocessor preprocessor = Preprocessor.WithTokens(tokens);
@@ -59,7 +59,7 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
         public void MissingEndIfForIfNDefTest()
         {
             // Arrange
-            IList<SyntaxToken> tokens = ParseText(@"#ifndef debug
+            IImmutableList<SyntaxToken> tokens = ParseText(@"#ifndef debug
 #define macro");
 
             Preprocessor preprocessor = Preprocessor.WithTokens(tokens);
@@ -79,7 +79,7 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
         public void ExtraEndIf()
         {
             // Arrange
-            IList<SyntaxToken> tokens = ParseText(@"#ifdef debug
+            IImmutableList<SyntaxToken> tokens = ParseText(@"#ifdef debug
 #define macro
 #endif
 #endif");
@@ -101,7 +101,7 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
         public void IncludeTest()
         {
             // Arrange
-            IList<SyntaxToken> tokens = ParseText(@"#include 'code/file1.dm'
+            IImmutableList<SyntaxToken> tokens = ParseText(@"#include 'code/file1.dm'
 #include 'code/file2.dm'");
 
             Preprocessor preprocessor = Preprocessor.WithTokens(tokens);
@@ -125,8 +125,8 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
         public void DefineTest()
         {
             // Arrange
-            IList<SyntaxToken> tokens       = ParseText("#define macro");
-            Preprocessor       preprocessor = Preprocessor.WithTokens(tokens);
+            IImmutableList<SyntaxToken> tokens       = ParseText("#define macro");
+            Preprocessor                preprocessor = Preprocessor.WithTokens(tokens);
 
             // Act
             preprocessor.Preprocess();
@@ -143,7 +143,7 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
         public void DefineAndUndefineTest()
         {
             // Arrange
-            IList<SyntaxToken> tokens = ParseText(@"#define macro
+            IImmutableList<SyntaxToken> tokens = ParseText(@"#define macro
 #undef macro");
 
             Preprocessor preprocessor = Preprocessor.WithTokens(tokens);
@@ -159,7 +159,7 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
         public void IfdefDefineTest()
         {
             // Arrange
-            IList<SyntaxToken> tokens = ParseText(@"#define debug
+            IImmutableList<SyntaxToken> tokens = ParseText(@"#define debug
 #ifdef debug
 #define macro
 #endif");
@@ -185,7 +185,7 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
         public void IfdefUndefTest()
         {
             // Arrange
-            IList<SyntaxToken> tokens = ParseText(@"#define debug
+            IImmutableList<SyntaxToken> tokens = ParseText(@"#define debug
 #ifdef debug
 #undef debug
 #endif");
@@ -203,7 +203,7 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
         public void IfNDefDefineTest()
         {
             // Arrange
-            IList<SyntaxToken> tokens = ParseText(@"#ifndef debug
+            IImmutableList<SyntaxToken> tokens = ParseText(@"#ifndef debug
 #define debug
 #endif");
 
@@ -224,7 +224,7 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
         public void IfNDefUndefTest()
         {
             // Arrange
-            IList<SyntaxToken> tokens = ParseText(@"#define macro
+            IImmutableList<SyntaxToken> tokens = ParseText(@"#define macro
 #ifndef debug
 #undef macro
 #endif");

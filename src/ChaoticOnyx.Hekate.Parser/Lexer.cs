@@ -1,7 +1,8 @@
-﻿#region
+#region
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Text;
 
 #endregion
@@ -13,15 +14,16 @@ namespace ChaoticOnyx.Hekate.Parser
     /// </summary>
     public class Lexer
     {
-        private readonly List<CodeIssue>   _issues          = new();
-        private readonly List<SyntaxToken> _leadTokensCache = new();
-        private readonly TextContainer     _source;
-        private readonly List<SyntaxToken> _trailTokensCache = new();
+        private readonly List<CodeIssue>    _issues          = new();
+        private readonly List<SyntaxToken>  _leadTokensCache = new();
+        private readonly TextContainer      _source;
+        private readonly IList<SyntaxToken> _tokens;
+        private readonly List<SyntaxToken>  _trailTokensCache = new();
 
         /// <summary>
         ///     Токены в единице компиляции.
         /// </summary>
-        public IList<SyntaxToken> Tokens { get; }
+        public IImmutableList<SyntaxToken> Tokens => _tokens.ToImmutableList();
 
         /// <summary>
         ///     Проблемы обнаруженные в единице компиляции.
@@ -35,7 +37,7 @@ namespace ChaoticOnyx.Hekate.Parser
         /// <param name="tabWidth">Ширина табуляции в файле.</param>
         public Lexer(string source, int tabWidth = 4)
         {
-            Tokens  = new List<SyntaxToken>();
+            _tokens = new List<SyntaxToken>();
             _source = new TextContainer(source, tabWidth);
         }
 
@@ -46,7 +48,7 @@ namespace ChaoticOnyx.Hekate.Parser
         /// <param name="tabWidth">Ширина табуляции в файле.</param>
         public Lexer(IList<SyntaxToken> tokens, int tabWidth = 4)
         {
-            Tokens  = tokens;
+            _tokens = tokens;
             _source = new TextContainer(Emit(), tabWidth);
         }
 
@@ -96,12 +98,12 @@ namespace ChaoticOnyx.Hekate.Parser
         /// </summary>
         public void Parse()
         {
-            Tokens.Clear();
+            _tokens.Clear();
 
             while (true)
             {
                 SyntaxToken token = Lex();
-                Tokens.Add(token);
+                _tokens.Add(token);
 
                 if (token.Kind == SyntaxKind.EndOfFile)
                 {
@@ -118,7 +120,7 @@ namespace ChaoticOnyx.Hekate.Parser
         {
             StringBuilder builder = new();
 
-            foreach (var token in Tokens)
+            foreach (var token in _tokens)
             {
                 builder.Append(token.FullText);
             }
@@ -626,7 +628,7 @@ namespace ChaoticOnyx.Hekate.Parser
         {
             StringBuilder? result = new();
 
-            foreach (var token in Tokens)
+            foreach (var token in _tokens)
             {
                 result.Append($"{token.Text}");
             }

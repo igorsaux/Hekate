@@ -1,4 +1,4 @@
-﻿namespace ChaoticOnyx.Hekate.Parser
+namespace ChaoticOnyx.Hekate.Parser
 {
     /// <summary>
     ///     Виды токенов.

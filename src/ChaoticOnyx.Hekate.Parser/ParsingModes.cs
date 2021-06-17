@@ -11,18 +11,8 @@ namespace ChaoticOnyx.Hekate.Parser
         None = 0,
 
         /// <summary>
-        ///     Также используется семантический парсер.
-        /// </summary>
-        WithSemantic = 1 << 0,
-
-        /// <summary>
         ///     Также используется препроцессор.
         /// </summary>
-        WithPreprocessor = 1 << 1,
-
-        /// <summary>
-        ///     Полный парсинг.
-        /// </summary>
-        Full = WithSemantic | WithPreprocessor
+        Full = 1 << 1
     }
 }

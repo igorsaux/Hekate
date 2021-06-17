@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace ChaoticOnyx.Hekate.Parser
@@ -14,12 +15,12 @@ namespace ChaoticOnyx.Hekate.Parser
         private readonly TypeContainer<SyntaxToken> _tokens;
 
         public IReadOnlyCollection<CodeIssue> Issues   => _issues.AsReadOnly();
-        public IList<SyntaxToken>             Includes => _includes;
-        public IList<SyntaxToken>             Defines  => _defines;
+        public IImmutableList<SyntaxToken>    Includes => _includes.ToImmutableList();
+        public IImmutableList<SyntaxToken>    Defines  => _defines.ToImmutableList();
 
-        private Preprocessor(IList<SyntaxToken>? tokens = null) => _tokens = new TypeContainer<SyntaxToken>(tokens ?? new List<SyntaxToken>());
+        private Preprocessor(IImmutableList<SyntaxToken>? tokens = null) => _tokens = new TypeContainer<SyntaxToken>(tokens?.ToList() ?? new List<SyntaxToken>());
 
-        public static Preprocessor WithTokens(IList<SyntaxToken> tokens) => new(tokens);
+        public static Preprocessor WithTokens(IImmutableList<SyntaxToken> tokens) => new(tokens);
 
         public static Preprocessor WithoutTokens() => new();
 

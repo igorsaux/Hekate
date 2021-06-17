@@ -46,7 +46,7 @@ namespace ChaoticOnyx.Hekate.Parser
 
         private static CompilationUnit Create(Lexer lexer, ParsingModes modes)
         {
-            Preprocessor preprocessor = modes.HasFlag(ParsingModes.WithPreprocessor)
+            Preprocessor preprocessor = modes.HasFlag(ParsingModes.Full)
                 ? Preprocessor.WithTokens(lexer.Tokens)
                 : Preprocessor.WithoutTokens();
 
