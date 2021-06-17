@@ -9,7 +9,7 @@
         {
             public static readonly CodeStyle Default = new()
             {
-                Spaces = new()
+                Spaces = new CodeStyleSpaces
                 {
                     Catch             = true,
                     For               = true,
@@ -35,32 +35,18 @@
                 },
                 Naming =
                 {
-                    Methods   = NamingConvention.Pascal,
-                    Paths     = NamingConvention.Underscored,
-                    Variables = NamingConvention.Camel
+                    Methods = NamingConvention.Pascal, Paths = NamingConvention.Underscored, Variables = NamingConvention.Camel
                 },
                 LastEmptyLine = true
             };
 
-            public bool LastEmptyLine = true;
+            public bool LastEmptyLine { get; init; } = true;
 
-            public CodeStyleSpaces Spaces
-            {
-                get;
-                init;
-            } = new();
+            public CodeStyleSpaces Spaces { get; init; } = new();
 
-            public CodeStyleParentheses Parentheses
-            {
-                get;
-                init;
-            } = new();
+            public CodeStyleParentheses Parentheses { get; init; } = new();
 
-            public CodeStyleNaming Naming
-            {
-                get;
-                init;
-            } = new();
+            public CodeStyleNaming Naming { get; init; } = new();
         }
 
         /// <summary>
@@ -81,29 +67,17 @@
             /// <summary>
             ///     Переменные.
             /// </summary>
-            public NamingConvention Variables
-            {
-                get;
-                set;
-            } = NamingConvention.Camel;
+            public NamingConvention Variables { get; set; } = NamingConvention.Camel;
 
             /// <summary>
             ///     Проки и вербы.
             /// </summary>
-            public NamingConvention Methods
-            {
-                get;
-                set;
-            } = NamingConvention.Pascal;
+            public NamingConvention Methods { get; set; } = NamingConvention.Pascal;
 
             /// <summary>
             ///     Пути.
             /// </summary>
-            public NamingConvention Paths
-            {
-                get;
-                set;
-            } = NamingConvention.Underscored;
+            public NamingConvention Paths { get; set; } = NamingConvention.Underscored;
         }
 
         /// <summary>
@@ -114,56 +88,32 @@
             /// <summary>
             ///     if (...) / if ...
             /// </summary>
-            public bool If
-            {
-                get;
-                set;
-            } = true;
+            public bool If { get; set; } = true;
 
             /// <summary>
             ///     while (...) / while ...
             /// </summary>
-            public bool While
-            {
-                get;
-                set;
-            } = true;
+            public bool While { get; set; } = true;
 
             /// <summary>
             ///     catch (...) / ...
             /// </summary>
-            public bool Catch
-            {
-                get;
-                set;
-            } = true;
+            public bool Catch { get; set; } = true;
 
             /// <summary>
             ///     throw (...) / throw ...
             /// </summary>
-            public bool Throw
-            {
-                get;
-                set;
-            } = true;
+            public bool Throw { get; set; } = true;
 
             /// <summary>
             ///     for (...) / for ...
             /// </summary>
-            public bool For
-            {
-                get;
-                set;
-            } = true;
+            public bool For { get; set; } = true;
 
             /// <summary>
             ///     new (...) / new ...
             /// </summary>
-            public bool New
-            {
-                get;
-                set;
-            } = true;
+            public bool New { get; set; } = true;
         }
 
         /// <summary>
@@ -174,110 +124,62 @@
             /// <summary>
             ///     if (...) / if(...)
             /// </summary>
-            public bool If
-            {
-                get;
-                set;
-            } = true;
+            public bool If { get; set; } = true;
 
             /// <summary>
             ///     while (...) / while(...)
             /// </summary>
-            public bool While
-            {
-                get;
-                set;
-            } = true;
+            public bool While { get; set; } = true;
 
             /// <summary>
             ///     catch (...) / catch(...)
             /// </summary>
-            public bool Catch
-            {
-                get;
-                set;
-            } = true;
+            public bool Catch { get; set; } = true;
 
             /// <summary>
             ///     throw (...) / throw(...)
             /// </summary>
-            public bool Throw
-            {
-                get;
-                set;
-            } = true;
+            public bool Throw { get; set; } = true;
 
             /// <summary>
             ///     for (...) / for(...)
             /// </summary>
-            public bool For
-            {
-                get;
-                set;
-            } = true;
+            public bool For { get; set; } = true;
 
             /// <summary>
             ///     new (...) / new(...)
             /// </summary>
-            public bool New
-            {
-                get;
-                set;
-            } = true;
+            public bool New { get; set; } = true;
 
             /// <summary>
             ///     ( a + b ) / (a + b)
             /// </summary>
-            public bool InParentheses
-            {
-                get;
-                set;
-            }
+            public bool InParentheses { get; set; }
 
             /// <summary>
             ///     [ a ] / [a]
             /// </summary>
-            public bool InBrackets
-            {
-                get;
-                set;
-            }
+            public bool InBrackets { get; set; }
 
             /// <summary>
             ///     foo () / foo()
             /// </summary>
-            public bool MethodParentheses
-            {
-                get;
-                set;
-            }
+            public bool MethodParentheses { get; set; }
 
             /// <summary>
             ///     a + b / a+b
             /// </summary>
-            public bool Operators
-            {
-                get;
-                set;
-            } = true;
+            public bool Operators { get; set; } = true;
 
             /// <summary>
             ///     a ,b / a,b
             /// </summary>
-            public bool BeforeComma
-            {
-                get;
-                set;
-            }
+            public bool BeforeComma { get; set; }
 
             /// <summary>
             ///     a, b / a,b
             /// </summary>
-            public bool AfterComma
-            {
-                get;
-                set;
-            } = true;
+            public bool AfterComma { get; set; } = true;
         }
     }
 }

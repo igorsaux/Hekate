@@ -1,5 +1,6 @@
-﻿#region
+#region
 
+using System.Collections.Immutable;
 using System.Linq;
 using Xunit;
 
@@ -13,150 +14,155 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
         public void CommentParsing()
         {
             // Arrange
-            CompilationUnit unit = new(@"/* MultiLine Comment*/
-
-// SingleLine Comment");
-
             // Act
-            unit.Parse();
-            var tokens = unit.Lexer.Tokens;
+            CompilationUnit unit = CompilationUnit.FromSource(@"/* MultiLine Comment*/
+
+// SingleLine Comment", modes: ParsingModes.None);
+
+            IImmutableList<SyntaxToken> tokens = unit.Lexer.Tokens;
+
+            // Assert
             Assert.True(tokens.Count == 1);
 
             Assert.True(tokens[0]
-                            .Kind == SyntaxKind.EndOfFile);
+                            .Kind
+                        == SyntaxKind.EndOfFile);
 
             Assert.True(tokens[0]
-                        .Leads.Count == 4);
+                        .Leads.Count
+                        == 4);
 
             Assert.True(tokens[0]
                         .Leads[0]
-                        .Kind == SyntaxKind.MultiLineComment);
+                        .Kind
+                        == SyntaxKind.MultiLineComment);
 
             Assert.True(tokens[0]
-                        .Leads.Count(t => t.Kind == SyntaxKind.EndOfLine) == 2);
+                        .Leads.Count(t => t.Kind == SyntaxKind.EndOfLine)
+                        == 2);
 
             Assert.True(tokens[0]
                         .Leads[3]
-                        .Kind == SyntaxKind.SingleLineComment);
+                        .Kind
+                        == SyntaxKind.SingleLineComment);
         }
 
         [Fact]
         public void IdentifierParsing()
         {
             // Arrange
-            CompilationUnit unit = new("literal");
-
             // Act
-            unit.Parse();
-            var tokens = unit.Lexer.Tokens;
+            CompilationUnit             unit   = CompilationUnit.FromSource("literal", modes: ParsingModes.None);
+            IImmutableList<SyntaxToken> tokens = unit.Lexer.Tokens;
 
             // Assert
             Assert.True(tokens.Count == 2);
 
             Assert.True(tokens[0]
-                            .Kind == SyntaxKind.Identifier);
+                            .Kind
+                        == SyntaxKind.Identifier);
 
             Assert.True(tokens[0]
-                            .Text == "literal");
+                            .Text
+                        == "literal");
         }
 
         [Fact]
         public void NumericalLiteralParsing()
         {
             // Arrange
-            CompilationUnit unit = new("123");
-
             // Act
-            unit.Parse();
-            var tokens = unit.Lexer.Tokens;
+            CompilationUnit             unit   = CompilationUnit.FromSource("123", modes: ParsingModes.None);
+            IImmutableList<SyntaxToken> tokens = unit.Lexer.Tokens;
 
             // Assert
             Assert.True(tokens.Count == 2);
 
             Assert.True(tokens[0]
-                            .Kind == SyntaxKind.NumericalLiteral);
+                            .Kind
+                        == SyntaxKind.NumericalLiteral);
 
             Assert.True(tokens[0]
-                            .Text == "123");
+                            .Text
+                        == "123");
         }
 
         [Fact]
         public void FloatNumericalLiteralParsing()
         {
             // Arrange
-            CompilationUnit unit = new("123.55");
-
             // Act
-            unit.Parse();
-            var tokens = unit.Lexer.Tokens;
+            CompilationUnit             unit   = CompilationUnit.FromSource("123.55", modes: ParsingModes.None);
+            IImmutableList<SyntaxToken> tokens = unit.Lexer.Tokens;
 
             // Assert
             Assert.True(tokens.Count == 2);
 
             Assert.True(tokens[0]
-                            .Kind == SyntaxKind.NumericalLiteral);
+                            .Kind
+                        == SyntaxKind.NumericalLiteral);
 
             Assert.True(tokens[0]
-                            .Text == "123.55");
+                            .Text
+                        == "123.55");
         }
 
         [Fact]
         public void TextLiteralParsing()
         {
             // Arrange
-            CompilationUnit unit = new("\"TextLiteral\"");
-
             // Act
-            unit.Parse();
-            var tokens = unit.Lexer.Tokens;
+            CompilationUnit             unit   = CompilationUnit.FromSource("\"TextLiteral\"", modes: ParsingModes.None);
+            IImmutableList<SyntaxToken> tokens = unit.Lexer.Tokens;
 
             // Assert
             Assert.True(tokens.Count == 2);
 
             Assert.True(tokens[0]
-                            .Kind == SyntaxKind.TextLiteral);
+                            .Kind
+                        == SyntaxKind.TextLiteral);
         }
 
         [Fact]
         public void PathLiteralParsing()
         {
             // Arrange
-            CompilationUnit unit = new("\'PathLiteral/file.dm\'");
-
             // Act
-            unit.Parse();
-            var tokens = unit.Lexer.Tokens;
+            CompilationUnit             unit   = CompilationUnit.FromSource("\'PathLiteral/file.dm\'", modes: ParsingModes.None);
+            IImmutableList<SyntaxToken> tokens = unit.Lexer.Tokens;
 
             // Assert
             Assert.True(tokens.Count == 2);
 
             Assert.True(tokens[0]
-                            .Kind == SyntaxKind.PathLiteral);
+                            .Kind
+                        == SyntaxKind.PathLiteral);
         }
 
         [Fact]
         public void SpacesParsing()
         {
             // Arrange
-            CompilationUnit unit = new(@"    // Comment");
-
             // Act
-            unit.Parse();
-            var tokens = unit.Lexer.Tokens;
+            CompilationUnit             unit   = CompilationUnit.FromSource(@"    // Comment", modes: ParsingModes.None);
+            IImmutableList<SyntaxToken> tokens = unit.Lexer.Tokens;
 
             // Assert
             Assert.True(tokens.Count == 1);
 
             Assert.True(tokens[0]
-                        .Leads.Count == 2);
+                        .Leads.Count
+                        == 2);
 
             Assert.True(tokens[0]
                         .Leads[0]
-                        .Kind == SyntaxKind.WhiteSpace);
+                        .Kind
+                        == SyntaxKind.WhiteSpace);
 
             Assert.True(tokens[0]
                         .Leads[1]
-                        .Kind == SyntaxKind.SingleLineComment);
+                        .Kind
+                        == SyntaxKind.SingleLineComment);
         }
 
         [Theory]
@@ -165,17 +171,16 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
         [InlineData(SyntaxKind.IfDefDirective)]
         [InlineData(SyntaxKind.EndIfDirective)]
         [InlineData(SyntaxKind.DefineDirective)]
+        [InlineData(SyntaxKind.UndefDirective)]
         public void DirectiveParsing(SyntaxKind kind)
         {
             // Arrange
-            CompilationUnit unit = new("#include #ifndef #ifdef #endif #define");
-
             // Act
-            unit.Parse();
-            var tokens = unit.Lexer.Tokens;
+            CompilationUnit             unit   = CompilationUnit.FromSource("#include #ifndef #ifdef #endif #define #undef", modes: ParsingModes.None);
+            IImmutableList<SyntaxToken> tokens = unit.Lexer.Tokens;
 
             // Assert
-            Assert.True(tokens.Count == 6);
+            Assert.True(tokens.Count == 7);
             Assert.True(tokens.Count(t => t.Kind == kind) == 1);
         }
 
@@ -198,11 +203,9 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
         public void KeywordParsing(SyntaxKind kind)
         {
             // Arrange
-            CompilationUnit unit = new("for new global throw catch try var verb proc in if else set as while");
-
             // Act
-            unit.Parse();
-            var tokens = unit.Lexer.Tokens;
+            CompilationUnit             unit   = CompilationUnit.FromSource("for new global throw catch try var verb proc in if else set as while", modes: ParsingModes.None);
+            IImmutableList<SyntaxToken> tokens = unit.Lexer.Tokens;
 
             // Assert
             Assert.True(tokens.Count == 16);
@@ -256,14 +259,10 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
         public void CheckTokenParsing(SyntaxKind kind, int expectedCount = 1)
         {
             // Arrange
-            CompilationUnit unit =
-                new(
-                    "* *= \\= '' \"\" / == = =!!= >= > >> >>= <= < << <<= () {} [] + ++ += - -- -=,, ** & &=&& /= % %= : ? ^ ^= | |= || \\ .");
-
             // Act
-            unit.Parse();
-            var tokens = unit.Lexer.Tokens;
-            var count  = tokens.Count(token => token.Kind == kind);
+            CompilationUnit             unit   = CompilationUnit.FromSource("* *= \\= '' \"\" / == = =!!= >= > >> >>= <= < << <<= () {} [] + ++ += - -- -=,, ** & &=&& /= % %= : ? ^ ^= | |= || \\ .", modes: ParsingModes.None);
+            IImmutableList<SyntaxToken> tokens = unit.Lexer.Tokens;
+            int                         count  = tokens.Count(token => token.Kind == kind);
 
             // Assert
             Assert.Equal(expectedCount, count);
@@ -277,16 +276,53 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
         public void TabSizeTest(int tabSize)
         {
             // Arrange
-            var text = "\t\tvar";
-            var unit = new CompilationUnit(text, tabSize);
-            var tabs = text.Count(c => c == '\t');
+            string text = "\t\tvar";
+            int    tabs = text.Count(c => c == '\t');
 
             // Act
-            unit.Parse();
-            var token = unit.Lexer.Tokens[0];
+            CompilationUnit unit  = CompilationUnit.FromSource(text, tabSize, ParsingModes.None);
+            SyntaxToken     token = unit.Lexer.Tokens[0];
 
             // Assert
             Assert.True(token.FilePosition.Column == 1 + tabs * tabSize);
+        }
+
+        [Fact]
+        public void EscapedTextTest()
+        {
+            // Arrange
+            const string text = @"var/a = ""chemical_reactions_list\[\""[reaction]\""\] = \""[chemical_reactions_list[reaction]]\""\n""";
+
+            // Act
+            CompilationUnit             unit   = CompilationUnit.FromSource(text, modes: ParsingModes.None);
+            IImmutableList<SyntaxToken> tokens = unit.Lexer.Tokens;
+
+            // Assert
+            Assert.True(tokens.Count == 6);
+
+            Assert.True(tokens[0]
+                            .Kind
+                        == SyntaxKind.VarKeyword);
+
+            Assert.True(tokens[1]
+                            .Kind
+                        == SyntaxKind.Slash);
+
+            Assert.True(tokens[2]
+                            .Kind
+                        == SyntaxKind.Identifier);
+
+            Assert.True(tokens[3]
+                            .Kind
+                        == SyntaxKind.Equal);
+
+            Assert.True(tokens[4]
+                            .Kind
+                        == SyntaxKind.TextLiteral);
+
+            Assert.True(tokens[5]
+                            .Kind
+                        == SyntaxKind.EndOfFile);
         }
     }
 }

@@ -12,7 +12,7 @@ namespace ChaoticOnyx.Hekate.Parser.Tests
         public void EmitTest()
         {
             // Arrange
-            var expected = @"/*
+            string expected = @"/*
 	These are simple defaults for your project.
  */
 #ifndef TEST
@@ -40,11 +40,10 @@ obj
 hello_world()
 ";
 
-            var unit = new CompilationUnit(expected);
+            CompilationUnit unit = CompilationUnit.FromSource(expected);
 
             // Act
-            unit.Parse();
-            var result = unit.Emit();
+            string result = unit.Emit();
 
             // Assert
             Assert.Equal(expected, result);

@@ -16,36 +16,22 @@ namespace ChaoticOnyx.Hekate.Parser
         /// <summary>
         ///     Длина всей коллекции.
         /// </summary>
-        public int Length
-        {
-            get;
-        }
+        public int Length { get; }
 
         /// <summary>
         ///     Коллекция контейнера.
         /// </summary>
-        public List<T> List
-        {
-            get;
-        }
+        public IList<T> List { get; }
 
         /// <summary>
         ///     Отступ от начала коллекции.
         /// </summary>
-        public int Offset
-        {
-            get;
-            protected set;
-        }
+        public int Offset { get; protected set; }
 
         /// <summary>
         ///     Последняя позиция от начала коллекции.
         /// </summary>
-        public int Position
-        {
-            get;
-            protected set;
-        }
+        public int Position { get; protected set; }
 
         /// <summary>
         ///     Если текущий отступ от начала коллекции в конце и дальше возвращает true.
@@ -58,7 +44,7 @@ namespace ChaoticOnyx.Hekate.Parser
             Length = List.Count;
         }
 
-        public TypeContainer(List<T> list)
+        public TypeContainer(IList<T> list)
         {
             List   = list;
             Length = List.Count;
@@ -76,39 +62,32 @@ namespace ChaoticOnyx.Hekate.Parser
         /// <summary>
         ///     Устанавливает позицию на текущий отступ.
         /// </summary>
-        public virtual void Start()
-        {
-            Position = Offset;
-        }
+        public virtual void Start() => Position = Offset;
 
         /// <summary>
         ///     Возвращает элемент на текущем отступе и увеличивает отступ на единицу.
         /// </summary>
         /// <returns></returns>
-        public virtual T Read()
-        {
-            return List[Offset++];
-        }
+        public virtual T Read() => List[Offset++];
 
         /// <summary>
-        ///     Возвращает элемент на определённом количестве шагов от текущего отступа и не передвигает его.
+        ///     Возвращает элемент на определённом количестве шагов от текущего отступа и не увеличивает индекс.
         /// </summary>
         /// <param name="offset">Количество шагов от текущего отступа.</param>
         /// <returns>Возвращает null если указанный отступ выходит за конец коллекции.</returns>
         public virtual T? Peek(int offset = 1)
         {
-            var result = Offset + offset - 1;
+            int result = Offset + offset - 1;
 
-            return result >= Length ? default : List[result];
+            return result >= Length
+                ? default(T)
+                : List[result];
         }
 
         /// <summary>
         ///     Передвигает отступ на указанное количество шагов.
         /// </summary>
         /// <param name="offset">Количество шагов</param>
-        public virtual void Advance(int offset = 1)
-        {
-            Offset += offset;
-        }
+        public virtual void Advance(int offset = 1) => Offset += offset;
     }
 }

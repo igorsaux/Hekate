@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="DM0001" xml:space="preserve">
-    <value>Missing closing sign for {0}.</value>
+    <value>Missing closing sign for `{0}`.</value>
   </data>
   <data name="Hint" xml:space="preserve">
     <value>Hint</value>
@@ -130,9 +130,18 @@
     <value>Error</value>
   </data>
   <data name="DM0002" xml:space="preserve">
-    <value>Unexpected token {0}.</value>
+    <value>Unexpected token `{0}`.</value>
   </data>
   <data name="DM0003" xml:space="preserve">
-    <value>Unknown directive {0}.</value>
+    <value>Unknown directive `{0}`.</value>
+  </data>
+  <data name="DM1001" xml:space="preserve">
+    <value>Unknown macros definition `{0}`.</value>
+  </data>
+  <data name="DM1002" xml:space="preserve">
+    <value>#endif for `{0}` not found.</value>
+  </data>
+  <data name="DM1003" xml:space="preserve">
+    <value>Extra #endif found.</value>
   </data>
 </root>

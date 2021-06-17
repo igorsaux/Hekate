@@ -17,7 +17,8 @@ namespace ChaoticOnyx.Hekate.Parser
         private int _positionLine = 1;
 
         public string LexemeText
-            => new(List.GetRange(Position, Offset - Position)
+            => new(List.ToList()
+                       .GetRange(Position, Offset - Position)
                        .ToArray());
 
         /// <summary>
@@ -27,10 +28,7 @@ namespace ChaoticOnyx.Hekate.Parser
 
         public FileLine LexemeFilePosition => new(_positionLine, _positionColumn);
 
-        public TextContainer(string text, int tabWidth) : base(text.ToArray())
-        {
-            TabWidth = tabWidth;
-        }
+        public TextContainer(string text, int tabWidth) : base(text.ToArray()) => TabWidth = tabWidth;
 
         public override void Reset()
         {
@@ -50,7 +48,7 @@ namespace ChaoticOnyx.Hekate.Parser
 
         public override char Read()
         {
-            var @char = base.Read();
+            char @char = base.Read();
 
             if (@char == '\n')
             {
@@ -71,12 +69,12 @@ namespace ChaoticOnyx.Hekate.Parser
 
         public override void Advance(int offset = 1)
         {
-            var start = offset;
-            var len   = start + offset;
+            int start = offset;
+            int len   = start + offset;
 
-            for (var i = start; i < len; i++)
+            for (int i = start; i < len; i++)
             {
-                var @char = Peek();
+                char @char = Peek();
 
                 if (@char == '\n')
                 {

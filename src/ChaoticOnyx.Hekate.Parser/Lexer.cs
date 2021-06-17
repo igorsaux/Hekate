@@ -1,9 +1,8 @@
-﻿#region
+#region
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
+using System.Collections.Immutable;
 using System.Text;
 
 #endregion
@@ -15,43 +14,84 @@ namespace ChaoticOnyx.Hekate.Parser
     /// </summary>
     public class Lexer
     {
-        private readonly List<CodeIssue>   _issues          = new();
-        private readonly List<SyntaxToken> _leadTokensCache = new();
-        private readonly TextContainer     _source;
-        private readonly List<SyntaxToken> _tokens           = new();
-        private readonly List<SyntaxToken> _trailTokensCache = new();
+        private readonly List<CodeIssue>    _issues          = new();
+        private readonly List<SyntaxToken>  _leadTokensCache = new();
+        private readonly TextContainer      _source;
+        private readonly IList<SyntaxToken> _tokens;
+        private readonly List<SyntaxToken>  _trailTokensCache = new();
 
         /// <summary>
         ///     Токены в единице компиляции.
         /// </summary>
-        public ReadOnlyCollection<SyntaxToken> Tokens => _tokens.AsReadOnly();
+        public IImmutableList<SyntaxToken> Tokens => _tokens.ToImmutableList();
 
         /// <summary>
         ///     Проблемы обнаруженные в единице компиляции.
         /// </summary>
-        public ReadOnlyCollection<CodeIssue> Issues => _issues.AsReadOnly();
+        public IReadOnlyCollection<CodeIssue> Issues => _issues.AsReadOnly();
 
         /// <summary>
         ///     Создание нового лексера из текста.
         /// </summary>
         /// <param name="source">Исходный код единицы компиляции.</param>
+        /// <param name="tabWidth">Ширина табуляции в файле.</param>
         public Lexer(string source, int tabWidth = 4)
         {
-            _source = new(source, tabWidth);
+            _tokens = new List<SyntaxToken>();
+            _source = new TextContainer(source, tabWidth);
         }
 
         /// <summary>
         ///     Создание нового лексера из набора токенов.
         /// </summary>
         /// <param name="tokens">Набор токенов.</param>
-        public Lexer(params SyntaxToken[] tokens) : this(4, tokens) { }
-
-        public Lexer(int tabWidth, params SyntaxToken[] tokens)
+        /// <param name="tabWidth">Ширина табуляции в файле.</param>
+        public Lexer(IList<SyntaxToken> tokens, int tabWidth = 4)
         {
-            _tokens = tokens.ToList();
-            _source = new(Emit(), tabWidth);
-            Parse();
+            _tokens = tokens;
+            _source = new TextContainer(Emit(), tabWidth);
         }
+
+        /// <summary>
+        ///     Определение типа директивы препроцессора.
+        /// </summary>
+        /// <param name="directive"></param>
+        private static void SetDirectiveKind(SyntaxToken directive)
+            => directive.Kind = directive.Text[1..] switch
+            {
+                "define"  => SyntaxKind.DefineDirective,
+                "ifdef"   => SyntaxKind.IfDefDirective,
+                "include" => SyntaxKind.IncludeDirective,
+                "ifndef"  => SyntaxKind.IfNDefDirective,
+                "endif"   => SyntaxKind.EndIfDirective,
+                "undef"   => SyntaxKind.UndefDirective,
+                _         => SyntaxKind.Directive
+            };
+
+        /// <summary>
+        ///     Определение ключевого слова.
+        /// </summary>
+        /// <param name="identifier"></param>
+        private static void SetKeywordOrIdentifierKind(SyntaxToken identifier)
+            => identifier.Kind = identifier.Text switch
+            {
+                "for"    => SyntaxKind.ForKeyword,
+                "new"    => SyntaxKind.NewKeyword,
+                "global" => SyntaxKind.GlobalKeyword,
+                "throw"  => SyntaxKind.ThrowKeyword,
+                "catch"  => SyntaxKind.CatchKeyword,
+                "try"    => SyntaxKind.TryKeyword,
+                "var"    => SyntaxKind.VarKeyword,
+                "verb"   => SyntaxKind.VerbKeyword,
+                "proc"   => SyntaxKind.ProcKeyword,
+                "in"     => SyntaxKind.InKeyword,
+                "if"     => SyntaxKind.IfKeyword,
+                "else"   => SyntaxKind.ElseKeyword,
+                "set"    => SyntaxKind.SetKeyword,
+                "as"     => SyntaxKind.AsKeyword,
+                "while"  => SyntaxKind.WhileKeyword,
+                _        => SyntaxKind.Identifier
+            };
 
         /// <summary>
         ///     Выполнение лексического парсинга исходного кода. При вызове функции все данные с предыдущего парсинга обнуляются.
@@ -62,7 +102,7 @@ namespace ChaoticOnyx.Hekate.Parser
 
             while (true)
             {
-                var token = Lex();
+                SyntaxToken token = Lex();
                 _tokens.Add(token);
 
                 if (token.Kind == SyntaxKind.EndOfFile)
@@ -96,7 +136,7 @@ namespace ChaoticOnyx.Hekate.Parser
         {
             _leadTokensCache.Clear();
             ParseTokenTrivia(false, _leadTokensCache);
-            var token = ScanToken();
+            SyntaxToken token = ScanToken();
             _trailTokensCache.Clear();
             ParseTokenTrivia(true, _trailTokensCache);
             token.AddLeadTokens(_leadTokensCache.ToArray());
@@ -110,17 +150,15 @@ namespace ChaoticOnyx.Hekate.Parser
         /// </summary>
         /// <param name="id">Идентификатор проблемы.</param>
         /// <param name="token">Токен, с которым связана проблема.</param>
-        private void MakeIssue(string id, SyntaxToken token)
-        {
-            MakeIssue(id, token, Array.Empty<object>());
-        }
+        private void MakeIssue(string id, SyntaxToken token) => MakeIssue(id, token, Array.Empty<object>());
 
-        /// <inheritdoc cref="MakeIssue(ChaoticOnyx.Hekate.Parser.IssueId,ChaoticOnyx.Hekate.Parser.SyntaxToken)" />
+        /// <summary>
+        ///     Создание проблемы в коде.
+        /// </summary>
+        /// <param name="id">Идентификатор проблемы.</param>
+        /// <param name="token">Токен, с которым связана проблема.</param>
         /// <param name="args">Дополнительные аргументы, используются для форматирования сообщения об проблеме.</param>
-        private void MakeIssue(string id, SyntaxToken token, params object[] args)
-        {
-            _issues.Add(new(id, token, _source.OffsetFilePosition, args));
-        }
+        private void MakeIssue(string id, SyntaxToken token, params object[] args) => _issues.Add(new CodeIssue(id, token, _source.OffsetFilePosition, args));
 
         /// <summary>
         ///     Парсинг одного токена.
@@ -135,10 +173,10 @@ namespace ChaoticOnyx.Hekate.Parser
                 return CreateTokenAndAdvance(SyntaxKind.EndOfFile, 0);
             }
 
-            var         ch            = _source.Peek();
-            var         parsingResult = false;
+            char        ch = _source.Peek();
+            bool        parsingResult;
             SyntaxToken token;
-            var         next = _source.Peek(2);
+            char        next = _source.Peek(2);
 
             switch (ch)
             {
@@ -150,8 +188,6 @@ namespace ChaoticOnyx.Hekate.Parser
                     }
 
                     return CreateTokenAndAdvance(SyntaxKind.Slash, 1);
-
-                    ;
                 case '\\':
                     switch (next)
                     {
@@ -185,7 +221,7 @@ namespace ChaoticOnyx.Hekate.Parser
                         case '=':
                             return CreateTokenAndAdvance(SyntaxKind.GreaterEqual, 2);
                         case '>':
-                            var next2 = _source.Peek(3);
+                            char next2 = _source.Peek(3);
 
                             return next2 switch
                             {
@@ -201,7 +237,7 @@ namespace ChaoticOnyx.Hekate.Parser
                         case '=':
                             return CreateTokenAndAdvance(SyntaxKind.LesserEqual, 2);
                         case '<':
-                            var next2 = _source.Peek(3);
+                            char next2 = _source.Peek(3);
 
                             return next2 switch
                             {
@@ -330,50 +366,6 @@ namespace ChaoticOnyx.Hekate.Parser
         }
 
         /// <summary>
-        ///     Определение типа директивы препроцессора.
-        /// </summary>
-        /// <param name="directive"></param>
-        private void SetDirectiveKind(SyntaxToken directive)
-        {
-            directive.Kind = directive.Text[1..] switch
-            {
-                "define"  => SyntaxKind.DefineDirective,
-                "ifdef"   => SyntaxKind.IfDefDirective,
-                "include" => SyntaxKind.IncludeDirective,
-                "ifndef"  => SyntaxKind.IfNDefDirective,
-                "endif"   => SyntaxKind.EndIfDirective,
-                _         => SyntaxKind.Directive
-            };
-        }
-
-        /// <summary>
-        ///     Определение ключевого слова.
-        /// </summary>
-        /// <param name="identifier"></param>
-        private void SetKeywordOrIdentifierKind(SyntaxToken identifier)
-        {
-            identifier.Kind = identifier.Text switch
-            {
-                "for"    => SyntaxKind.ForKeyword,
-                "new"    => SyntaxKind.NewKeyword,
-                "global" => SyntaxKind.GlobalKeyword,
-                "throw"  => SyntaxKind.ThrowKeyword,
-                "catch"  => SyntaxKind.CatchKeyword,
-                "try"    => SyntaxKind.TryKeyword,
-                "var"    => SyntaxKind.VarKeyword,
-                "verb"   => SyntaxKind.VerbKeyword,
-                "proc"   => SyntaxKind.ProcKeyword,
-                "in"     => SyntaxKind.InKeyword,
-                "if"     => SyntaxKind.IfKeyword,
-                "else"   => SyntaxKind.ElseKeyword,
-                "set"    => SyntaxKind.SetKeyword,
-                "as"     => SyntaxKind.AsKeyword,
-                "while"  => SyntaxKind.WhileKeyword,
-                _        => SyntaxKind.Identifier
-            };
-        }
-
-        /// <summary>
         ///     Парсинг идентификатора.
         /// </summary>
         private void ParseIdentifier()
@@ -385,7 +377,7 @@ namespace ChaoticOnyx.Hekate.Parser
                     return;
                 }
 
-                var ch = _source.Peek();
+                char ch = _source.Peek();
 
                 if (!char.IsLetter(ch) && ch != '_' && !char.IsDigit(ch))
                 {
@@ -408,7 +400,7 @@ namespace ChaoticOnyx.Hekate.Parser
                     return;
                 }
 
-                var ch = _source.Peek();
+                char ch = _source.Peek();
 
                 if (!char.IsDigit(ch) && ch != '.')
                 {
@@ -432,7 +424,17 @@ namespace ChaoticOnyx.Hekate.Parser
                     return false;
                 }
 
-                if (_source.Read() == '\"')
+                char ch   = _source.Read();
+                char next = _source.Peek();
+
+                if (ch == '\\' && next == '\"')
+                {
+                    _source.Advance();
+
+                    continue;
+                }
+
+                if (ch == '\"')
                 {
                     return true;
                 }
@@ -463,13 +465,10 @@ namespace ChaoticOnyx.Hekate.Parser
         {
             _source.Advance(length);
 
-            return new(kind, _source.LexemeText, _source.Position, _source.LexemeFilePosition);
+            return new SyntaxToken(kind, _source.LexemeText, _source.Position, _source.LexemeFilePosition);
         }
 
-        private SyntaxToken CreateToken(SyntaxKind kind)
-        {
-            return new(kind, _source.LexemeText, _source.Position, _source.LexemeFilePosition);
-        }
+        private SyntaxToken CreateToken(SyntaxKind kind) => new(kind, _source.LexemeText, _source.Position, _source.LexemeFilePosition);
 
         /// <summary>
         ///     Парсинг ведущих и хвостовых токенов.
@@ -487,8 +486,8 @@ namespace ChaoticOnyx.Hekate.Parser
                     return;
                 }
 
-                var ch   = _source.Peek();
-                var next = _source.Peek(2);
+                char ch   = _source.Peek();
+                char next = _source.Peek(2);
 
                 switch (ch)
                 {
@@ -508,8 +507,8 @@ namespace ChaoticOnyx.Hekate.Parser
                                 break;
                             case '*':
                                 _source.Advance(2);
-                                var endFounded = SkipToEndOfMultiLineComment();
-                                var comment    = CreateToken(SyntaxKind.MultiLineComment);
+                                bool        endFounded = SkipToEndOfMultiLineComment();
+                                SyntaxToken comment    = CreateToken(SyntaxKind.MultiLineComment);
 
                                 if (!endFounded)
                                 {
@@ -566,7 +565,7 @@ namespace ChaoticOnyx.Hekate.Parser
         {
             while (!_source.IsEnd)
             {
-                var ch = _source.Peek();
+                char ch = _source.Peek();
 
                 if (ch != ' ' && ch != '\t')
                 {
@@ -590,7 +589,7 @@ namespace ChaoticOnyx.Hekate.Parser
                     return false;
                 }
 
-                var ch = _source.Read();
+                char ch = _source.Read();
 
                 switch (ch)
                 {
@@ -614,7 +613,7 @@ namespace ChaoticOnyx.Hekate.Parser
         {
             while (!_source.IsEnd)
             {
-                var ch = _source.Peek();
+                char ch = _source.Peek();
 
                 if (ch == '\n')
                 {
@@ -627,7 +626,7 @@ namespace ChaoticOnyx.Hekate.Parser
 
         public override string ToString()
         {
-            var result = new StringBuilder();
+            StringBuilder? result = new();
 
             foreach (var token in _tokens)
             {

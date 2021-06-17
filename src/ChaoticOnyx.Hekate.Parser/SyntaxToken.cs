@@ -20,19 +20,12 @@ namespace ChaoticOnyx.Hekate.Parser
         /// <summary>
         ///     Тип токена.
         /// </summary>
-        public SyntaxKind Kind
-        {
-            get;
-            set;
-        }
+        public SyntaxKind Kind { get; set; }
 
         /// <summary>
         ///     Содержимое токена.
         /// </summary>
-        public string Text
-        {
-            get;
-        }
+        public string Text { get; }
 
         public string FullText => GetFullText();
 
@@ -49,23 +42,17 @@ namespace ChaoticOnyx.Hekate.Parser
         /// <summary>
         ///     Абсолютное расположение токена в тексте.
         /// </summary>
-        public int Position
-        {
-            get;
-        }
+        public int Position { get; }
 
         /// <summary>
         ///     Возвращает относительное расположение токена в тексте.
         /// </summary>
-        public FileLine FilePosition
-        {
-            get;
-        } = new(1, 1);
+        public FileLine FilePosition { get; } = new(1, 1);
 
         /// <summary>
         ///     Возвращает true если имеет в хвостовых токенах конец линии.
         /// </summary>
-        public bool HasEndOfLine => _trailTokens.Count(t => t.Kind == SyntaxKind.EndOfLine) > 0;
+        public bool HasEndOfLine => _trailTokens.Any(t => t.Kind == SyntaxKind.EndOfLine);
 
         /// <summary>
         ///     Ведущие токены.
@@ -83,16 +70,9 @@ namespace ChaoticOnyx.Hekate.Parser
         /// <param name="kind">Тип токена.</param>
         /// <param name="text">Содержимое токена.</param>
         /// <param name="position">Позиция токена.</param>
-        public SyntaxToken(SyntaxKind kind, string text, int position) : this(kind, text)
-        {
-            Position = position;
-        }
+        public SyntaxToken(SyntaxKind kind, string text, int position) : this(kind, text) => Position = position;
 
-        public SyntaxToken(SyntaxKind kind, string text, int position, FileLine filePosition) : this(
-            kind, text, position)
-        {
-            FilePosition = filePosition;
-        }
+        public SyntaxToken(SyntaxKind kind, string text, int position, FileLine filePosition) : this(kind, text, position) => FilePosition = filePosition;
 
         /// <summary>
         ///     Создание нового токена.
@@ -123,7 +103,7 @@ namespace ChaoticOnyx.Hekate.Parser
         /// <returns>Длина.</returns>
         private int GetFullLength()
         {
-            var result = Text.Length;
+            int result = Text.Length;
             result += Leads.Sum(token => token.FullLength);
             result += Trails.Sum(token => token.FullLength);
 
@@ -134,19 +114,13 @@ namespace ChaoticOnyx.Hekate.Parser
         ///     Добавить лидирующих токенов.
         /// </summary>
         /// <param name="tokens"></param>
-        public void AddLeadTokens(params SyntaxToken[] tokens)
-        {
-            _leadTokens.AddRange(tokens);
-        }
+        public void AddLeadTokens(params SyntaxToken[] tokens) => _leadTokens.AddRange(tokens);
 
         /// <summary>
         ///     Добавить хвостовых токенов.
         /// </summary>
         /// <param name="tokens"></param>
-        public void AddTrailTokens(params SyntaxToken[] tokens)
-        {
-            _trailTokens.AddRange(tokens);
-        }
+        public void AddTrailTokens(params SyntaxToken[] tokens) => _trailTokens.AddRange(tokens);
 
         public string GetFullText()
         {
@@ -167,9 +141,6 @@ namespace ChaoticOnyx.Hekate.Parser
             return builder.ToString();
         }
 
-        public override string ToString()
-        {
-            return $"{Kind} - {{{Text}}}";
-        }
+        public override string ToString() => $"{Kind} - {{{Text}}}";
     }
 }
