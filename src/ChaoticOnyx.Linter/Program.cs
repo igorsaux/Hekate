@@ -1,6 +1,6 @@
 using Spectre.Console.Cli;
 
-namespace DMLinter
+namespace ChaoticOnyx.Linter
 {
     public static class Program
     {

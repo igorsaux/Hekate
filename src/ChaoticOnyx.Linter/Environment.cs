@@ -4,17 +4,18 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using ChaoticOnyx.Hekate;
-using DMLinter.Analyzers;
+using ChaoticOnyx.Linter.Analyzers;
 using Spectre.Console;
 using Console = Spectre.Console.AnsiConsole;
 
-namespace DMLinter
+namespace ChaoticOnyx.Linter
 {
     public sealed class Environment
     {
         public static List<CodeAnalyzer> CodeAnalyzers = new()
         {
-            new SpaceAnalyzer()
+            new SpaceAnalyzer(),
+            new SpansAnalyzer()
         };
 
         private Dictionary<FileInfo, AnalysisResult>  _analysisResults { get; } = new Dictionary<FileInfo, AnalysisResult>();

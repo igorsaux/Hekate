@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using ChaoticOnyx.Hekate;
 
-namespace DMLinter.Analyzers
+namespace ChaoticOnyx.Linter.Analyzers
 {
     /// <summary>
     ///     Анализатор пробелов в коде.

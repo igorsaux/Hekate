@@ -1,7 +1,7 @@
 using System;
 using ChaoticOnyx.Hekate;
 
-namespace DMLinter
+namespace ChaoticOnyx.Linter
 {
     /// <summary>
     ///     Все возможные ошибки анализаторов.
@@ -24,6 +24,7 @@ namespace DMLinter
                 MissingSpaceBefore => "Отсутствует пробел перед `{0}`.",
                 ExtraSpaceAfter    => "Лишний пробел после `{0}`.",
                 ExtraSpaceBefore   => "Лишний пробел перед `{0}`.",
+                UseSpan => "Используйте макрос SPAN.",
 
                 // Встроенные ошибки.
                 IssuesId.MissingClosingSign      => "Отсутствует закрывающий знак для `{0}`.",
@@ -40,5 +41,7 @@ namespace DMLinter
 
         public const string MissingSpaceBefore = "DMSC0002";
         public const string ExtraSpaceBefore   = "DMSC1002";
+
+        public const string UseSpan = "DMSC0003";
     }
 }
