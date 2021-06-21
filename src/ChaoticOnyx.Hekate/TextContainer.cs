@@ -17,8 +17,7 @@ namespace ChaoticOnyx.Hekate
         private int _positionLine = 1;
 
         public string LexemeText
-            => new(List.ToList()
-                       .GetRange(Position, Offset - Position)
+            => new(List.GetRange(Position, Offset - Position)
                        .ToArray());
 
         /// <summary>
