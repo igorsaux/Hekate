@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChaoticOnyx.Hekate.Tests", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChaoticOnyx.Linter", "src\ChaoticOnyx.Linter\ChaoticOnyx.Linter.csproj", "{B172D41D-5827-4400-AB4B-0D97E09BFFEE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChaoticOnyx.Server", "src\ChaoticOnyx.Server\ChaoticOnyx.Server.csproj", "{17A4891B-FF63-47A3-A524-3DE45C5E525D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{B172D41D-5827-4400-AB4B-0D97E09BFFEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B172D41D-5827-4400-AB4B-0D97E09BFFEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B172D41D-5827-4400-AB4B-0D97E09BFFEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17A4891B-FF63-47A3-A524-3DE45C5E525D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17A4891B-FF63-47A3-A524-3DE45C5E525D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17A4891B-FF63-47A3-A524-3DE45C5E525D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17A4891B-FF63-47A3-A524-3DE45C5E525D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

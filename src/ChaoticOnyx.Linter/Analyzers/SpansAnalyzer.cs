@@ -55,19 +55,16 @@ namespace ChaoticOnyx.Linter.Analyzers
                         string content = match.Groups["content"]
                                               .Value;
 
-                        _fixedTokens.Add(SyntaxFactory.Identifier("SPAN"));
-
-                        _fixedTokens[0]
-                            .AddLeadTokens(token.Leads.ToArray());
+                        _fixedTokens.Add(SyntaxFactory.Identifier("SPAN")
+                                                      .WithLeads(token.Leads.ToArray()));
 
                         _fixedTokens.Add(SyntaxFactory.OpenParentheses());
                         _fixedTokens.Add(SyntaxFactory.TextLiteral(classes));
                         _fixedTokens.Add(SyntaxFactory.Comma());
                         _fixedTokens.Add(SyntaxFactory.TextLiteral(content));
-                        _fixedTokens.Add(SyntaxFactory.CloseParentheses());
 
-                        _fixedTokens.Last()
-                                    .AddTrailTokens(token.Trails.ToArray());
+                        _fixedTokens.Add(SyntaxFactory.CloseParentheses()
+                                                      .WithTrails(token.Trails.ToArray()));
 
                         break;
                     default:
