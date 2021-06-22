@@ -302,26 +302,6 @@ namespace ChaoticOnyx.Hekate.Tests
             Assert.Equal(expectedCount, count);
         }
 
-        [Theory]
-        [InlineData(1)]
-        [InlineData(2)]
-        [InlineData(4)]
-        [InlineData(8)]
-        public void TabSizeTest(int tabSize)
-        {
-            // Arrange
-            string text = "\t\tvar";
-            int    tabs = text.Count(c => c == '\t');
-
-            // Act
-            CompilationUnit unit = CompilationUnit.FromSource(text, tabWidth: tabSize);
-            unit.Parse();
-            SyntaxToken token = unit.Tokens[0];
-
-            // Assert
-            Assert.True(token.FilePosition.Column == 1 + tabs * tabSize);
-        }
-
         [Fact]
         public void EscapedTextTest()
         {

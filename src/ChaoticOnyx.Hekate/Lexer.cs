@@ -36,10 +36,10 @@ namespace ChaoticOnyx.Hekate
         /// </summary>
         /// <param name="source">Исходный код единицы компиляции.</param>
         /// <param name="tabWidth">Ширина табуляции в файле.</param>
-        public Lexer(string source, int tabWidth = 4)
+        public Lexer(string source)
         {
             _tokens = new List<SyntaxToken>();
-            _source = new TextContainer(source, tabWidth);
+            _source = new TextContainer(source);
         }
 
         /// <summary>
@@ -47,10 +47,10 @@ namespace ChaoticOnyx.Hekate
         /// </summary>
         /// <param name="tokens">Набор токенов.</param>
         /// <param name="tabWidth">Ширина табуляции в файле.</param>
-        public Lexer(IImmutableList<SyntaxToken> tokens, int tabWidth = 4)
+        public Lexer(IImmutableList<SyntaxToken> tokens)
         {
             _tokens = tokens.ToList();
-            _source = new TextContainer(Emit(), tabWidth);
+            _source = new TextContainer(Emit());
         }
 
         /// <summary>

@@ -14,12 +14,11 @@ namespace ChaoticOnyx.Linter
     {
         public static List<CodeAnalyzer> CodeAnalyzers = new()
         {
-            new SpaceAnalyzer(),
-            new SpansAnalyzer()
+            new SpaceAnalyzer(), new SpansAnalyzer()
         };
 
-        private Dictionary<FileInfo, AnalysisResult>  _analysisResults { get; } = new Dictionary<FileInfo, AnalysisResult>();
-        private Dictionary<FileInfo, CompilationUnit> _files           { get; } = new Dictionary<FileInfo, CompilationUnit>();
+        private Dictionary<FileInfo, AnalysisResult>  _analysisResults { get; } = new();
+        private Dictionary<FileInfo, CompilationUnit> _files           { get; } = new();
 
         /// <summary>
         ///     Все включённые файлы в проекте.
@@ -88,9 +87,12 @@ namespace ChaoticOnyx.Linter
                    {
                        foreach (var (file, unit) in _files)
                        {
-                           var result = Analyze(tryToFix, file);
+                           AnalysisResult? result = Analyze(tryToFix, file);
                            issuesCount += result.CodeIssues.Count;
-                           issuesCount += unit.GetIssues().Count;
+
+                           issuesCount += unit.GetIssues()
+                                              .Count;
+
                            _analysisResults.Add(file, result);
                        }
                    });
@@ -107,10 +109,10 @@ namespace ChaoticOnyx.Linter
         /// <param name="file">Анализировать только определённый файл.</param>
         public AnalysisResult Analyze(bool tryToFix, FileInfo file)
         {
-            var             issues = new List<CodeIssue>();
+            List<CodeIssue>? issues        = new List<CodeIssue>();
             CompilationUnit? lastFixedUnit = null;
-            var             unit    = _files[file];
-            AnalysisContext context = new(CodeStyle.Default, unit, tryToFix);
+            CompilationUnit? unit          = _files[file];
+            AnalysisContext  context       = new(CodeStyle.Default, unit, tryToFix);
 
             foreach (var analyzer in CodeAnalyzers)
             {
@@ -166,9 +168,9 @@ namespace ChaoticOnyx.Linter
                     continue;
                 }
 
-                var relativePath = Path.GetRelativePath(Dme.DirectoryName!, file.FullName);
+                string? relativePath = Path.GetRelativePath(Dme.DirectoryName!, file.FullName);
 
-                var table = new Table
+                Table? table = new Table
                 {
                     Border = TableBorder.Rounded
                 };
@@ -178,8 +180,8 @@ namespace ChaoticOnyx.Linter
 
                 foreach (var issue in result.CodeIssues)
                 {
-                    var position = issue.Token.FilePosition;
-                    var message  = string.Format(Issues.IdToMessage(issue.Id), issue.Arguments);
+                    FileLine? position = issue.Token.FilePosition;
+                    string?   message  = string.Format(Issues.IdToMessage(issue.Id), issue.Arguments);
                     table.AddRow($"[bold red]{issue.Id}[/]", $"[bold yellow]{relativePath}:{position.Line}:{position.Column} {message}[/]");
                 }
 
@@ -199,7 +201,7 @@ namespace ChaoticOnyx.Linter
                 return;
             }
 
-            CompilationUnit unit    = CompilationUnit.FromSource(File.ReadAllText(file.FullName));
+            CompilationUnit unit = CompilationUnit.FromSource(File.ReadAllText(file.FullName));
             unit.Parse(context);
             _files.Add(file, unit);
 
@@ -212,7 +214,7 @@ namespace ChaoticOnyx.Linter
             {
                 string includePath = include.Text[1..^1];
                 includePath = Path.GetFullPath(includePath, file.DirectoryName!);
-                FileInfo includeFile = new FileInfo(includePath);
+                FileInfo includeFile = new(includePath);
 
                 if (includeFile.Extension is not ".dme" and not ".dm")
                 {

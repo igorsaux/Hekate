@@ -167,7 +167,7 @@ namespace ChaoticOnyx.Linter.Analyzers
                             : CreateTokenWithSpaceBeforeFrom(token);
                     }
 
-                    AddIssue(Issues.ExtraSpaceAfter, token);
+                    AddIssue(Issues.MissingSpaceAfter, token);
                 }
             }
             else
@@ -181,7 +181,7 @@ namespace ChaoticOnyx.Linter.Analyzers
                             : CreateTokenWithoutSpaceBeforeFrom(token);
                     }
 
-                    AddIssue(Issues.MissingSpaceAfter, token);
+                    AddIssue(Issues.ExtraSpaceAfter, token);
                 }
             }
 

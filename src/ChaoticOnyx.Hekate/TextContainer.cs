@@ -8,9 +8,7 @@ namespace ChaoticOnyx.Hekate
 {
     internal class TextContainer : TypeContainer<char>
     {
-        public readonly int TabWidth;
-        private         int _offsetColumn = 1;
-
+        private int _offsetColumn   = 1;
         private int _offsetLine     = 1;
         private int _positionColumn = 1;
 
@@ -27,7 +25,7 @@ namespace ChaoticOnyx.Hekate
 
         public FileLine LexemeFilePosition => new(_positionLine, _positionColumn);
 
-        public TextContainer(string text, int tabWidth) : base(text.ToArray()) => TabWidth = tabWidth;
+        public TextContainer(string text) : base(text.ToArray()) { }
 
         public override void Reset()
         {
@@ -54,10 +52,6 @@ namespace ChaoticOnyx.Hekate
                 _offsetLine   += 1;
                 _offsetColumn =  1;
             }
-            else if (@char == '\t')
-            {
-                _offsetColumn += TabWidth;
-            }
             else
             {
                 _offsetColumn += 1;
@@ -79,10 +73,6 @@ namespace ChaoticOnyx.Hekate
                 {
                     _offsetLine   += 1;
                     _offsetColumn =  1;
-                }
-                else if (@char == '\t')
-                {
-                    _offsetColumn += TabWidth;
                 }
                 else
                 {

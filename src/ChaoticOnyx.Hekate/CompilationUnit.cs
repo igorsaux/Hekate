@@ -35,21 +35,21 @@ namespace ChaoticOnyx.Hekate
             Context      = PreprocessorContext.Empty;
         }
 
-        public static CompilationUnit FromSource(string source, Preprocessor? preprocessor = null, int tabWidth = 4) => Create(new Lexer(source, tabWidth), preprocessor ?? new Preprocessor());
+        public static CompilationUnit FromSource(string source, Preprocessor? preprocessor = null) => Create(new Lexer(source), preprocessor ?? new Preprocessor());
 
-        public static CompilationUnit FromTokens(IImmutableList<SyntaxToken> tokens, Preprocessor? preprocessor = null, int tabWidth = 4) => Create(new Lexer(tokens, tabWidth), preprocessor ?? new Preprocessor());
+        public static CompilationUnit FromTokens(IImmutableList<SyntaxToken> tokens, Preprocessor? preprocessor = null) => Create(new Lexer(tokens), preprocessor ?? new Preprocessor());
 
-        public static CompilationUnit FromToken(SyntaxToken token, Preprocessor? preprocessor = null, int tabWidth = 4)
+        public static CompilationUnit FromToken(SyntaxToken token, Preprocessor? preprocessor = null)
         {
             Lexer lexer = new(new List<SyntaxToken>
             {
                 token
-            }.ToImmutableList(), tabWidth);
+            }.ToImmutableList());
 
             return Create(new Lexer(new List<SyntaxToken>
             {
                 token
-            }.ToImmutableList(), tabWidth), preprocessor ?? new Preprocessor());
+            }.ToImmutableList()), preprocessor ?? new Preprocessor());
         }
 
         private static CompilationUnit Create(Lexer lexer, Preprocessor preprocessor) => new(lexer, preprocessor);
