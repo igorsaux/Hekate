@@ -9,7 +9,7 @@ namespace ChaoticOnyx.Linter.Analyzers
     public sealed class SpansAnalyzer : CodeAnalyzer
     {
         private readonly List<CodeIssue>    _issues  = new();
-        private readonly string             _pattern = @"\s*""<\s*span\s+class\s*=\s*['""](?<class>.*)\s*['""]\s*>(?<content>\s*.*\s*)<\s*\/\s*span\s*>""\s*";
+        private readonly string             _pattern = @"\s*""\s*<\s*span\s+class\s*=\s*['""](?<class>[^'""]*)\s*['""]\s*>(?<content>\s*[^><]*\s*)<\s*\/\s*span\s*>\s*""\s*";
         private          List<SyntaxToken>? _fixedTokens;
         private          bool               _fixMode;
 
@@ -56,11 +56,18 @@ namespace ChaoticOnyx.Linter.Analyzers
                                               .Value;
 
                         _fixedTokens.Add(SyntaxFactory.Identifier("SPAN"));
+
+                        _fixedTokens[0]
+                            .AddLeadTokens(token.Leads.ToArray());
+
                         _fixedTokens.Add(SyntaxFactory.OpenParentheses());
                         _fixedTokens.Add(SyntaxFactory.TextLiteral(classes));
                         _fixedTokens.Add(SyntaxFactory.Comma());
                         _fixedTokens.Add(SyntaxFactory.TextLiteral(content));
                         _fixedTokens.Add(SyntaxFactory.CloseParentheses());
+
+                        _fixedTokens.Last()
+                                    .AddTrailTokens(token.Trails.ToArray());
 
                         break;
                     default:

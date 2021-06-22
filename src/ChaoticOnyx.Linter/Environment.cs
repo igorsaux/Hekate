@@ -61,7 +61,8 @@ namespace ChaoticOnyx.Linter
                    .Spinner(Spinner.Known.Star)
                    .Start("Парсинг файлов...", ctx =>
                    {
-                       ParseFile(Dme, PreprocessorContext.Empty);
+                       PreprocessorContext preprocessorContext = PreprocessorContext.Empty;
+                       ParseFile(Dme, ref preprocessorContext);
                    });
 
             Console.MarkupLine($"Обнаружено файлов: [bold yellow]{_files.Count}[/].");
@@ -191,7 +192,7 @@ namespace ChaoticOnyx.Linter
         /// </summary>
         /// <param name="file">Файл для парсинга.</param>
         /// <param name="context">Контекст препроцессора.</param>
-        private void ParseFile(FileInfo file, PreprocessorContext context)
+        private void ParseFile(FileInfo file, ref PreprocessorContext context)
         {
             if (_files.ContainsKey(file))
             {
@@ -201,6 +202,11 @@ namespace ChaoticOnyx.Linter
             CompilationUnit unit    = CompilationUnit.FromSource(File.ReadAllText(file.FullName));
             unit.Parse(context);
             _files.Add(file, unit);
+
+            context = context with
+            {
+                Defines = unit.Context.Defines
+            };
 
             foreach (var include in unit.Context.Includes)
             {
@@ -213,7 +219,7 @@ namespace ChaoticOnyx.Linter
                     continue;
                 }
 
-                ParseFile(includeFile, unit.Context);
+                ParseFile(includeFile, ref context);
             }
         }
     }
