@@ -3,16 +3,15 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using ChaoticOnyx.Hekate;
-using ChaoticOnyx.Linter.Analyzers;
+using ChaoticOnyx.Hekate.Linter.Analyzers;
 using Spectre.Console;
 using Console = Spectre.Console.AnsiConsole;
 
-namespace ChaoticOnyx.Linter
+namespace ChaoticOnyx.Hekate.Linter
 {
     public sealed class Environment
     {
-        public static List<CodeAnalyzer> CodeAnalyzers = new()
+        public static readonly List<CodeAnalyzer> CodeAnalyzers = new()
         {
             new SpaceAnalyzer(), new SpansAnalyzer()
         };
@@ -109,7 +108,7 @@ namespace ChaoticOnyx.Linter
         /// <param name="file">Анализировать только определённый файл.</param>
         public AnalysisResult Analyze(bool tryToFix, FileInfo file)
         {
-            List<CodeIssue>? issues        = new List<CodeIssue>();
+            List<CodeIssue>? issues        = new();
             CompilationUnit? lastFixedUnit = null;
             CompilationUnit? unit          = _files[file];
             AnalysisContext  context       = new(CodeStyle.Default, unit, tryToFix);
@@ -170,7 +169,7 @@ namespace ChaoticOnyx.Linter
 
                 string? relativePath = Path.GetRelativePath(Dme.DirectoryName!, file.FullName);
 
-                Table? table = new Table
+                Table? table = new()
                 {
                     Border = TableBorder.Rounded
                 };

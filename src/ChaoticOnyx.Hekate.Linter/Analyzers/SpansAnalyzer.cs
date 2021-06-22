@@ -2,9 +2,8 @@
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text.RegularExpressions;
-using ChaoticOnyx.Hekate;
 
-namespace ChaoticOnyx.Linter.Analyzers
+namespace ChaoticOnyx.Hekate.Linter.Analyzers
 {
     public sealed class SpansAnalyzer : CodeAnalyzer
     {

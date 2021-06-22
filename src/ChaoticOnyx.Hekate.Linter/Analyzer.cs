@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
-using ChaoticOnyx.Hekate;
 
-namespace ChaoticOnyx.Linter
+namespace ChaoticOnyx.Hekate.Linter
 {
     /// <summary>
     ///     Результат анализа.

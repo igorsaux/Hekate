@@ -12,7 +12,7 @@ namespace ChaoticOnyx.Hekate
         private readonly Stack<SyntaxToken>         _ifs      = new();
         private readonly List<CodeIssue>            _issues   = new();
         private          List<SyntaxToken>          _defines  = new();
-        private          List<SyntaxToken>          _includes = new();
+        private readonly List<SyntaxToken>          _includes = new();
         private          TypeContainer<SyntaxToken> _tokens   = new();
 
         public IImmutableList<CodeIssue> Issues => _issues.ToImmutableList();

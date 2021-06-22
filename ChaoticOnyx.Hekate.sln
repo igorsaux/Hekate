@@ -7,9 +7,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChaoticOnyx.Hekate", "src\C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChaoticOnyx.Hekate.Tests", "src\ChaoticOnyx.Hekate.Tests\ChaoticOnyx.Hekate.Tests.csproj", "{4A749EE3-1BD1-4531-9A00-4DFFC223DDB5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChaoticOnyx.Linter", "src\ChaoticOnyx.Linter\ChaoticOnyx.Linter.csproj", "{B172D41D-5827-4400-AB4B-0D97E09BFFEE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChaoticOnyx.Hekate.Linter", "src\ChaoticOnyx.Hekate.Linter\ChaoticOnyx.Hekate.Linter.csproj", "{B172D41D-5827-4400-AB4B-0D97E09BFFEE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChaoticOnyx.Server", "src\ChaoticOnyx.Server\ChaoticOnyx.Server.csproj", "{17A4891B-FF63-47A3-A524-3DE45C5E525D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChaoticOnyx.Hekate.Server", "src\ChaoticOnyx.Hekate.Server\ChaoticOnyx.Hekate.Server.csproj", "{17A4891B-FF63-47A3-A524-3DE45C5E525D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

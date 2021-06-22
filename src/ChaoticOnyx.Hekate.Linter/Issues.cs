@@ -1,7 +1,6 @@
 using System;
-using ChaoticOnyx.Hekate;
 
-namespace ChaoticOnyx.Linter
+namespace ChaoticOnyx.Hekate.Linter
 {
     /// <summary>
     ///     Все возможные ошибки анализаторов.
@@ -24,7 +23,7 @@ namespace ChaoticOnyx.Linter
                 MissingSpaceBefore => "Отсутствует пробел перед `{0}`.",
                 ExtraSpaceAfter    => "Лишний пробел после `{0}`.",
                 ExtraSpaceBefore   => "Лишний пробел перед `{0}`.",
-                UseSpan => "Используйте макрос SPAN.",
+                UseSpan            => "Используйте макрос SPAN.",
 
                 // Встроенные ошибки.
                 IssuesId.MissingClosingSign      => "Отсутствует закрывающий знак для `{0}`.",

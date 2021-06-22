@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using ChaoticOnyx.Hekate;
 
-namespace ChaoticOnyx.Linter.Analyzers
+namespace ChaoticOnyx.Hekate.Linter.Analyzers
 {
     /// <summary>
     ///     Анализатор пробелов в коде.

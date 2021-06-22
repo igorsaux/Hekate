@@ -3,7 +3,7 @@ using System.IO;
 using Spectre.Console.Cli;
 using Console = Spectre.Console.AnsiConsole;
 
-namespace ChaoticOnyx.Linter
+namespace ChaoticOnyx.Hekate.Linter
 {
     public sealed class AppRunSettings : CommandSettings
     {

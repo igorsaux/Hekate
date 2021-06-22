@@ -15,11 +15,11 @@ namespace ChaoticOnyx.Hekate
     /// </summary>
     public class Lexer
     {
-        private readonly List<CodeIssue>    _issues          = new();
-        private readonly List<SyntaxToken>  _leadTokensCache = new();
-        private readonly TextContainer      _source;
+        private readonly List<CodeIssue>   _issues          = new();
+        private readonly List<SyntaxToken> _leadTokensCache = new();
+        private readonly TextContainer     _source;
         private readonly List<SyntaxToken> _tokens;
-        private readonly List<SyntaxToken>  _trailTokensCache = new();
+        private readonly List<SyntaxToken> _trailTokensCache = new();
 
         /// <summary>
         ///     Токены в единице компиляции.
