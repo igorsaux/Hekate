@@ -1,4 +1,4 @@
-﻿using System;
+﻿using BenchmarkDotNet.Reports;
 using BenchmarkDotNet.Running;
 
 namespace ChaoticOnyx.Hekate.Benchmark
@@ -7,7 +7,7 @@ namespace ChaoticOnyx.Hekate.Benchmark
     {
         public static void Main()
         {
-            var summary = BenchmarkRunner.Run<ParsingEnvironmentBenchmark>();
+            Summary? summary = BenchmarkRunner.Run<ParsingEnvironmentBenchmark>();
         }
     }
 }

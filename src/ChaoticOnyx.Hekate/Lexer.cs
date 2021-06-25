@@ -175,53 +175,53 @@ namespace ChaoticOnyx.Hekate
                 return CreateTokenAndAdvance(SyntaxKind.EndOfFile, 0);
             }
 
-            char        ch = _source.Peek();
+            var        span = _source.Peek();
             bool        parsingResult;
             SyntaxToken token;
-            char        next = _source.Peek(2);
+            var        spanNext = _source.Peek(2);
 
-            switch (ch)
+            switch (span[0])
             {
                 case '/':
-                    return next switch
+                    return spanNext[0] switch
                     {
                         '=' => CreateTokenAndAdvance(SyntaxKind.SlashEqual, 2),
                         _   => CreateTokenAndAdvance(SyntaxKind.Slash, 1)
                     };
                 case '\\':
-                    return next switch
+                    return spanNext[0] switch
                     {
                         '=' => CreateTokenAndAdvance(SyntaxKind.BackSlashEqual, 2),
                         _   => CreateTokenAndAdvance(SyntaxKind.Backslash, 1)
                     };
                 case '*':
-                    return next switch
+                    return spanNext[0] switch
                     {
                         '=' => CreateTokenAndAdvance(SyntaxKind.AsteriskEqual, 2),
                         '*' => CreateTokenAndAdvance(SyntaxKind.DoubleAsterisk, 2),
                         _   => CreateTokenAndAdvance(SyntaxKind.Asterisk, 1)
                     };
                 case '=':
-                    return next switch
+                    return spanNext[0] switch
                     {
                         '=' => CreateTokenAndAdvance(SyntaxKind.DoubleEqual, 2),
                         _   => CreateTokenAndAdvance(SyntaxKind.Equal, 1)
                     };
                 case '!':
-                    return next switch
+                    return spanNext[0] switch
                     {
                         '=' => CreateTokenAndAdvance(SyntaxKind.ExclamationEqual, 2),
                         _   => CreateTokenAndAdvance(SyntaxKind.Exclamation, 1)
                     };
                 case '>':
-                    switch (next)
+                    switch (spanNext[0])
                     {
                         case '=':
                             return CreateTokenAndAdvance(SyntaxKind.GreaterEqual, 2);
                         case '>':
-                            char next2 = _source.Peek(3);
+                            var spanNextNext = _source.Peek(3);
 
-                            return next2 switch
+                            return spanNextNext[0] switch
                             {
                                 '=' => CreateTokenAndAdvance(SyntaxKind.DoubleGreaterEqual, 3),
                                 _   => CreateTokenAndAdvance(SyntaxKind.DoubleGreater, 2)
@@ -230,14 +230,14 @@ namespace ChaoticOnyx.Hekate
 
                     return CreateTokenAndAdvance(SyntaxKind.Greater, 1);
                 case '<':
-                    switch (next)
+                    switch (spanNext[0])
                     {
                         case '=':
                             return CreateTokenAndAdvance(SyntaxKind.LesserEqual, 2);
                         case '<':
-                            char next2 = _source.Peek(3);
+                            var spanNextNext = _source.Peek(3);
 
-                            return next2 switch
+                            return spanNextNext[0] switch
                             {
                                 '=' => CreateTokenAndAdvance(SyntaxKind.DoubleLesserEqual, 3),
                                 _   => CreateTokenAndAdvance(SyntaxKind.DoubleLesser, 2)
@@ -258,14 +258,14 @@ namespace ChaoticOnyx.Hekate
                 case ']':
                     return CreateTokenAndAdvance(SyntaxKind.CloseBracket, 1);
                 case '+':
-                    return next switch
+                    return spanNext[0] switch
                     {
                         '=' => CreateTokenAndAdvance(SyntaxKind.PlusEqual, 2),
                         '+' => CreateTokenAndAdvance(SyntaxKind.DoublePlus, 2),
                         _   => CreateTokenAndAdvance(SyntaxKind.Plus, 1)
                     };
                 case '-':
-                    return next switch
+                    return spanNext[0] switch
                     {
                         '=' => CreateTokenAndAdvance(SyntaxKind.MinusEqual, 2),
                         '-' => CreateTokenAndAdvance(SyntaxKind.DoubleMinus, 2),
@@ -294,13 +294,13 @@ namespace ChaoticOnyx.Hekate
 
                     return token;
                 case '%':
-                    return next switch
+                    return spanNext[0] switch
                     {
                         '=' => CreateTokenAndAdvance(SyntaxKind.PercentEqual, 2),
                         _   => CreateTokenAndAdvance(SyntaxKind.Percent, 1)
                     };
                 case '&':
-                    return next switch
+                    return spanNext[0] switch
                     {
                         '=' => CreateTokenAndAdvance(SyntaxKind.AmpersandEqual, 2),
                         '&' => CreateTokenAndAdvance(SyntaxKind.DoubleAmpersand, 2),
@@ -311,13 +311,13 @@ namespace ChaoticOnyx.Hekate
                 case ':':
                     return CreateTokenAndAdvance(SyntaxKind.Colon, 1);
                 case '^':
-                    return next switch
+                    return spanNext[0] switch
                     {
                         '=' => CreateTokenAndAdvance(SyntaxKind.CaretEqual, 2),
                         _   => CreateTokenAndAdvance(SyntaxKind.Caret, 1)
                     };
                 case '|':
-                    return next switch
+                    return spanNext[0] switch
                     {
                         '=' => CreateTokenAndAdvance(SyntaxKind.BarEqual, 2),
                         '|' => CreateTokenAndAdvance(SyntaxKind.DoubleBar, 2),
@@ -328,7 +328,7 @@ namespace ChaoticOnyx.Hekate
                 case '#':
                     _source.Advance();
 
-                    if (next == '#')
+                    if (spanNext[0] == '#')
                     {
                         _source.Advance();
 
@@ -353,7 +353,7 @@ namespace ChaoticOnyx.Hekate
 
             _source.Advance();
 
-            if (char.IsLetter(ch))
+            if (char.IsLetter(span[0]))
             {
                 ParseIdentifier();
                 token = CreateToken(SyntaxKind.Identifier);
@@ -362,7 +362,7 @@ namespace ChaoticOnyx.Hekate
                 return token;
             }
 
-            if (char.IsDigit(ch))
+            if (char.IsDigit(span[0]))
             {
                 ParseNumericalLiteral();
 
@@ -387,9 +387,9 @@ namespace ChaoticOnyx.Hekate
                     return;
                 }
 
-                char ch = _source.Peek();
+                var span = _source.Peek();
 
-                if (!char.IsLetter(ch) && ch != '_' && !char.IsDigit(ch))
+                if (!char.IsLetter(span[0]) && span[0] != '_' && !char.IsDigit(span[0]))
                 {
                     return;
                 }
@@ -410,9 +410,9 @@ namespace ChaoticOnyx.Hekate
                     return;
                 }
 
-                char ch = _source.Peek();
+                var span = _source.Peek();
 
-                if (!char.IsDigit(ch) && ch != '.')
+                if (!char.IsDigit(span[0]) && span[0] != '.')
                 {
                     return;
                 }
@@ -434,12 +434,12 @@ namespace ChaoticOnyx.Hekate
                     return false;
                 }
 
-                char ch   = _source.Read();
-                char next = _source.Peek();
+                var span   = _source.Read();
+                var spanNext = _source.Peek();
 
-                switch (ch)
+                switch (span[0])
                 {
-                    case '\\' when next == '\"':
+                    case '\\' when spanNext[0] == '\"':
                         _source.Advance();
 
                         continue;
@@ -462,7 +462,7 @@ namespace ChaoticOnyx.Hekate
                     return false;
                 }
 
-                if (_source.Read() == '\'')
+                if (_source.Read()[0] == '\'')
                 {
                     return true;
                 }
@@ -494,10 +494,10 @@ namespace ChaoticOnyx.Hekate
                     return;
                 }
 
-                char ch   = _source.Peek();
-                char next = _source.Peek(2);
+                var span   = _source.Peek();
+                var spanNext = _source.Peek(2);
 
-                switch (ch)
+                switch (span[0])
                 {
                     case '/':
                         if (isTrail)
@@ -505,7 +505,7 @@ namespace ChaoticOnyx.Hekate
                             return;
                         }
 
-                        switch (next)
+                        switch (spanNext[0])
                         {
                             case '/':
                                 _source.Advance(2);
@@ -543,7 +543,7 @@ namespace ChaoticOnyx.Hekate
 
                         break;
                     case '\r':
-                        switch (next)
+                        switch (spanNext[0])
                         {
                             case '\n':
                                 trivia.Add(CreateTokenAndAdvance(SyntaxKind.EndOfLine, 2));
@@ -573,9 +573,9 @@ namespace ChaoticOnyx.Hekate
         {
             while (!_source.IsEnd)
             {
-                char ch = _source.Peek();
+                var span = _source.Peek();
 
-                if (ch != ' ' && ch != '\t')
+                if (span[0] != ' ' && span[0] != '\t')
                 {
                     return;
                 }
@@ -597,12 +597,19 @@ namespace ChaoticOnyx.Hekate
                     return false;
                 }
 
-                char ch = _source.Read();
+                var span = _source.Read();
 
-                switch (ch)
+                switch (span[0])
                 {
                     case '*':
-                        if (_source.Peek() == '/')
+                        var spanNext = _source.Peek();
+
+                        if (spanNext.IsEmpty)
+                        {
+                            return false;
+                        }
+
+                        if (spanNext[0] == '/')
                         {
                             _source.Advance();
 
@@ -621,9 +628,9 @@ namespace ChaoticOnyx.Hekate
         {
             while (!_source.IsEnd)
             {
-                char ch = _source.Peek();
+                var span = _source.Peek();
 
-                if (ch == '\n')
+                if (span[0] == '\n')
                 {
                     return;
                 }

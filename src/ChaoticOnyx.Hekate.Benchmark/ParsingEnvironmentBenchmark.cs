@@ -12,10 +12,7 @@ namespace ChaoticOnyx.Hekate.Benchmark
     {
         public string DmeFile { get; }
 
-        public ParsingEnvironmentBenchmark()
-        {
-            DmeFile = Environment.GetEnvironmentVariable("HEKATE_BENCH_DME") ?? throw new InvalidOperationException("Переменная среды 'HEKATE_BENCH_DME' не установлена.");
-        }
+        public ParsingEnvironmentBenchmark() => DmeFile = Environment.GetEnvironmentVariable("HEKATE_BENCH_DME") ?? throw new InvalidOperationException("Переменная среды 'HEKATE_BENCH_DME' не установлена.");
 
         [Benchmark]
         public void Parse()

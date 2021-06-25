@@ -6,7 +6,7 @@ namespace ChaoticOnyx.Hekate.Linter
     {
         public static void Main(string[] args)
         {
-            CommandApp<App>? app = new CommandApp<App>();
+            CommandApp<App> app = new();
 
             app.Configure(configuration =>
             {

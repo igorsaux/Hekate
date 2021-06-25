@@ -1,5 +1,6 @@
 ﻿#region
 
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -68,21 +69,21 @@ namespace ChaoticOnyx.Hekate
         ///     Создание нового токена.
         /// </summary>
         /// <param name="kind">Тип токена.</param>
-        /// <param name="text">Содержимое токена.</param>
+        /// <param name="span">Содержимое токена.</param>
         /// <param name="position">Позиция токена.</param>
-        public SyntaxToken(SyntaxKind kind, string text, int position) : this(kind, text) => Position = position;
+        public SyntaxToken(SyntaxKind kind, ReadOnlySpan<char> span, int position) : this(kind, span) => Position = position;
 
-        public SyntaxToken(SyntaxKind kind, string text, int position, FileLine filePosition) : this(kind, text, position) => FilePosition = filePosition;
+        public SyntaxToken(SyntaxKind kind, ReadOnlySpan<char> span, int position, FileLine filePosition) : this(kind, span, position) => FilePosition = filePosition;
 
         /// <summary>
         ///     Создание нового токена.
         /// </summary>
         /// <param name="kind">Тип токена.</param>
-        /// <param name="text">Содержимое токена.</param>
-        public SyntaxToken(SyntaxKind kind, string text)
+        /// <param name="span">Содержимое токена.</param>
+        public SyntaxToken(SyntaxKind kind, ReadOnlySpan<char> span)
         {
             Kind = kind;
-            Text = text;
+            Text = span.ToString();
         }
 
         /// <summary>

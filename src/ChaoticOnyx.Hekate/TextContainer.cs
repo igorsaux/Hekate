@@ -1,12 +1,15 @@
 ﻿#region
 
-using System.Linq;
+using System;
 
 #endregion
 
 namespace ChaoticOnyx.Hekate
 {
-    internal class TextContainer : TypeContainer<char>
+    /// <summary>
+    ///     Контейнер для по-элементного считывания содержимого.
+    /// </summary>
+    internal sealed class TextContainer
     {
         private int _offsetColumn   = 1;
         private int _offsetLine     = 1;
@@ -14,9 +17,29 @@ namespace ChaoticOnyx.Hekate
 
         private int _positionLine = 1;
 
-        public string LexemeText
-            => new(List.GetRange(Position, Offset - Position)
-                       .ToArray());
+        public ReadOnlySpan<char> LexemeText
+            => _buffer.Slice(Position, Offset - Position)
+                      .Span;
+
+        /// <summary>
+        ///     Длина всей коллекции.
+        /// </summary>
+        public int Length { get; }
+
+        /// <summary>
+        ///     Отступ от начала коллекции.
+        /// </summary>
+        public int Offset { get; private set; }
+
+        /// <summary>
+        ///     Последняя позиция от начала коллекции.
+        /// </summary>
+        public int Position { get; private set; }
+
+        /// <summary>
+        ///     Если текущий отступ от начала коллекции в конце и дальше возвращает true.
+        /// </summary>
+        public bool IsEnd => Offset >= Length;
 
         /// <summary>
         ///     Возвращает текущую позицию в файле.
@@ -25,29 +48,50 @@ namespace ChaoticOnyx.Hekate
 
         public FileLine LexemeFilePosition => new(_positionLine, _positionColumn);
 
-        public TextContainer(string text) : base(text.ToArray()) { }
+        /// <summary>
+        ///     Коллекция контейнера.
+        /// </summary>
+        private readonly ReadOnlyMemory<char> _buffer;
 
-        public override void Reset()
+        public TextContainer(string text)
         {
-            base.Reset();
+            _buffer = text.AsMemory();
+            Length  = _buffer.Length;
+        }
+
+        /// <summary>
+        ///     Устанавливает отступ в начало коллекции.
+        /// </summary>
+        public void Reset()
+        {
+            Offset = 0;
+            Start();
             _offsetLine     = 1;
             _offsetColumn   = 1;
             _positionLine   = 1;
             _positionColumn = 1;
         }
 
-        public override void Start()
+        /// <summary>
+        ///     Устанавливает позицию на текущий отступ.
+        /// </summary>
+        public void Start()
         {
-            base.Start();
+            Position        = Offset;
             _positionLine   = _offsetLine;
             _positionColumn = _offsetColumn;
         }
 
-        public override char Read()
+        /// <summary>
+        ///     Возвращает элемент на текущем отступе и увеличивает отступ на единицу.
+        /// </summary>
+        /// <returns></returns>
+        public ReadOnlySpan<char> Read()
         {
-            char @char = base.Read();
+            ReadOnlySpan<char> span = _buffer.Slice(Offset++, 1)
+                                             .Span;
 
-            if (@char == '\n')
+            if (span[0] == '\n')
             {
                 _offsetLine   += 1;
                 _offsetColumn =  1;
@@ -57,19 +101,38 @@ namespace ChaoticOnyx.Hekate
                 _offsetColumn += 1;
             }
 
-            return @char;
+            return span;
         }
 
-        public override void Advance(int offset = 1)
+        /// <summary>
+        ///     Возвращает элемент на определённом количестве шагов от текущего отступа и не увеличивает индекс.
+        /// </summary>
+        /// <param name="offset">Количество шагов от текущего отступа.</param>
+        /// <returns>Возвращает null если указанный отступ выходит за конец коллекции.</returns>
+        public ReadOnlySpan<char> Peek(int offset = 1)
+        {
+            int result = Offset + offset - 1;
+
+            return result >= Length
+                ? default(ReadOnlySpan<char>)
+                : _buffer.Slice(result, 1)
+                         .Span;
+        }
+
+        /// <summary>
+        ///     Передвигает отступ на указанное количество шагов.
+        /// </summary>
+        /// <param name="offset">Количество шагов</param>
+        public void Advance(int offset = 1)
         {
             int start = offset;
             int len   = start + offset;
 
             for (int i = start; i < len; i++)
             {
-                char @char = Peek();
+                var span = Peek();
 
-                if (@char == '\n')
+                if (span[0] == '\n')
                 {
                     _offsetLine   += 1;
                     _offsetColumn =  1;
