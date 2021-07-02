@@ -25,8 +25,8 @@ namespace ChaoticOnyx.Hekate.Server.Dm
         /// <summary>
         ///     Производит парсинг файла.
         /// </summary>
-        /// <param name="lexer"></param>
-        /// <returns></returns>
+        /// <param name="lexer">Используемый лексер.</param>
+        /// <returns>Результат парсинга.</returns>
         public LinkedList<SyntaxToken> Parse(Lexer lexer)
         {
             _code = new Memory<char>(System.IO.File.ReadAllText(File.FullName)

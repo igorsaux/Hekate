@@ -19,5 +19,8 @@
       <_ContentIncludedByDefault Remove="artifacts\bin\ChaoticOnyx.Hekate.Benchmark\Release\net5.0\ChaoticOnyx.Hekate.Linter.runtimeconfig.json" />
       <_ContentIncludedByDefault Remove="artifacts\obj\ChaoticOnyx.Hekate.Benchmark\ChaoticOnyx.Hekate.Benchmark.csproj.nuget.dgspec.json" />
       <_ContentIncludedByDefault Remove="artifacts\obj\ChaoticOnyx.Hekate.Benchmark\project.assets.json" />
+      <_ContentIncludedByDefault Remove="artifacts\bin\ChaoticOnyx.Hekate.Benchmark\Release\net5.0\ChaoticOnyx.Hekate.Server.deps.json" />
+      <_ContentIncludedByDefault Remove="artifacts\bin\ChaoticOnyx.Hekate.Benchmark\Release\net5.0\ChaoticOnyx.Hekate.Server.runtimeconfig.dev.json" />
+      <_ContentIncludedByDefault Remove="artifacts\bin\ChaoticOnyx.Hekate.Benchmark\Release\net5.0\ChaoticOnyx.Hekate.Server.runtimeconfig.json" />
     </ItemGroup>
 </Project>
