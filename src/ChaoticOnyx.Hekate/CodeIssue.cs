@@ -5,7 +5,7 @@ namespace ChaoticOnyx.Hekate
     /// <summary>
     ///     Проблемы встречаемые в коде.
     /// </summary>
-    public record CodeIssue
+    public sealed record CodeIssue
     {
         public readonly object[]    Arguments;
         public readonly string      Id;
