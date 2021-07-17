@@ -18,4 +18,8 @@
     <ProjectReference Include="..\ChaoticOnyx.Hekate.Server\ChaoticOnyx.Hekate.Server.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Analyzers" />
+  </ItemGroup>
+
 </Project>

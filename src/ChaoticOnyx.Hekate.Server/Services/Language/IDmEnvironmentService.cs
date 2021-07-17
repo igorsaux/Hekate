@@ -9,8 +9,7 @@ namespace ChaoticOnyx.Hekate.Server.Services.Language
     public interface IDmEnvironmentService
     {
         public List<CodeFile> Files { get; }
-        public Task           ParseEnvironmentAsync(FileInfo dme, CancellationToken cancellationToken = default);
 
-        public Task ParseFileAsync(FileInfo file, CancellationToken cancellationToken = default);
+        public Task           ParseEnvironmentAsync(FileInfo dme, CancellationToken cancellationToken = default);
     }
 }

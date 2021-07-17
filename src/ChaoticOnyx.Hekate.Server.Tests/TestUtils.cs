@@ -38,9 +38,9 @@ var/another_var = 555");
 
         public static (IFileProvider, IDmLanguageService, IDmEnvironmentService) ProvideServices()
         {
-            IFileProvider         fileProvider       = new FileProvider();
-            IDmLanguageService    languageService    = new DmLanguageService(fileProvider);
-            IDmEnvironmentService environmentService = new DmEnvironmentService(languageService);
+            IFileProvider          fileProvider          = new FileProvider();
+            IDmLanguageService     languageService       = new DmLanguageService(fileProvider);
+            IDmEnvironmentService  environmentService    = new DmEnvironmentService(languageService);
 
             return (fileProvider, languageService, environmentService);
         }

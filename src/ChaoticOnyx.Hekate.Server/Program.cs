@@ -24,25 +24,20 @@ namespace ChaoticOnyx.Hekate.Server
                           services.AddLogging(configure => configure.SetMinimumLevel(LogLevel.Trace));
                           services.AddSingleton<IFileProvider, CachedFileProvider>();
                           services.AddSingleton<IDmLanguageService, DmLanguageService>();
+                          services.AddSingleton<ICodeAnalyzersProvider, CodeAnalyzersProvider>();
                           services.AddSingleton<IDmEnvironmentService, DmEnvironmentService>();
                       })
-                      .WithHandler<ParseEnvironmentHandler>()
-                      .WithHandler<ParseFileHandler>();
+                      .WithHandler<ParseEnvironmentHandler>();
 
         private static async Task Main()
         {
-            //Log.Logger = new LoggerConfiguration().Enrich.FromLogContext()
-            //                                      .WriteTo.File("hekate-server.log", rollingInterval: RollingInterval.Hour)
-            //                                      .MinimumLevel.Verbose()
-            //                                      .CreateLogger();
+            Log.Logger = new LoggerConfiguration().Enrich.FromLogContext()
+                                                  .WriteTo.File("hekate-server.log", rollingInterval: RollingInterval.Hour)
+                                                  .MinimumLevel.Verbose()
+                                                  .CreateLogger();
 
-            //LanguageServer server = await LanguageServer.From(ConfigureServer);
-            //await server.WaitForExit;
-            IFileProvider         fileProvider       = new CachedFileProvider();
-            IDmLanguageService    languageService    = new DmLanguageService(fileProvider);
-            IDmEnvironmentService environmentService = new DmEnvironmentService(languageService);
-            await environmentService.ParseEnvironmentAsync(new FileInfo(@"C:\Users\Admin\Desktop\OnyxBay\baystation12.dme"));
-            //await environmentService.ReparseEnvironmentFromFileAsync(new FileInfo(@"C:\Users\Admin\Desktop\OnyxBay\code\hub.dm"));
+            LanguageServer server = await LanguageServer.From(ConfigureServer);
+            await server.WaitForExit;
         }
     }
 }

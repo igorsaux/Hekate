@@ -2,5 +2,5 @@
 
 namespace ChaoticOnyx.Hekate.Server.Language
 {
-    public record VisitContext(LinkedList<SyntaxToken> Tokens, LinkedListNode<SyntaxToken> Token, PreprocessorContext PreprocessorContext);
+    public record VisitContext(CodeFile CodeFile, LinkedListNode<SyntaxToken> Token, PreprocessorContext PreprocessorContext);
 }

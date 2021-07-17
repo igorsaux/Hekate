@@ -44,7 +44,7 @@ namespace ChaoticOnyx.Hekate
         /// <summary>
         ///     Возвращает относительное расположение токена в тексте.
         /// </summary>
-        public FileLine FilePosition { get; } = new(1, 1);
+        public FileLine FilePosition { get; } = new(0, 0);
 
         /// <summary>
         ///     Возвращает true если имеет в хвостовых токенах конец линии.

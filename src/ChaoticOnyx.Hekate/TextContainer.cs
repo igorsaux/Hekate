@@ -49,9 +49,9 @@ namespace ChaoticOnyx.Hekate
         /// <summary>
         ///     Возвращает текущую позицию в файле.
         /// </summary>
-        public FileLine OffsetFilePosition => new(_offsetLine, _offsetColumn);
+        public FileLine OffsetFilePosition => new(_offsetLine - 1, _offsetColumn);
 
-        public FileLine LexemeFilePosition => new(_positionLine, _positionColumn);
+        public FileLine LexemeFilePosition => new(_positionLine - 1, _positionColumn);
 
         public TextContainer(ReadOnlyMemory<char> text)
         {
